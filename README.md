@@ -8,3 +8,4 @@ Distributed cache implemented with MongoDB
 - Docs (Wiki ? Github pages ?)
 - [Code analysis](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/overview?tabs=net-8)
 - Logging
+- GitHub Packages ?
