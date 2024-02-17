@@ -1,0 +1,84 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Restore dotnet tools",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "tool",
+                "restore"
+            ]
+        },
+        {
+            "label": "Run Unit tests",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "tests/Frcs6.Extensions.Caching.MongoDB.Tests",
+                "/p:CollectCoverage=true",
+                "/p:CoverletOutputFormat=lcov",
+                "/p:CoverletOutput=${workspaceFolder}/TestResult/lcov.info"
+            ],
+            "group": {
+                "kind": "test"
+            },
+            "dependsOn": [
+                "Clear coverage"
+            ]
+        },
+        {
+            "label": "Run Integrated tests",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "tests/Frcs6.Extensions.Caching.MongoDB.IntegratedTests",
+                "/p:CollectCoverage=true",
+                "/p:CoverletOutputFormat=lcov",
+                "/p:CoverletOutput=${workspaceFolder}/TestResult/lcov.info",
+                "/p:MergeWith==${workspaceFolder}/TestResult/lcov.info"
+            ],
+            "group": {
+                "kind": "test"
+            },
+            "dependsOn": [
+                "Clear coverage"
+            ]
+        },
+        {
+            "label": "Run All tests",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "/p:CollectCoverage=true",
+                "/p:CoverletOutputFormat=lcov",
+                "/p:CoverletOutput=${workspaceFolder}/TestResult/lcov.info"
+            ],
+            "group": {
+                "kind": "test"
+            },
+            "dependsOn": [
+                "Clear coverage"
+            ]
+        },
+        {
+            "label": "Run Stryker",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "stryker"
+            ],
+            "group": {
+                "kind": "test"
+            }
+        },
+        {
+            "command": "rm -rf ${workspaceFolder}/TestResult",
+            "label": "Clear coverage",
+            "type": "shell"
+        }
+    ]
+}
