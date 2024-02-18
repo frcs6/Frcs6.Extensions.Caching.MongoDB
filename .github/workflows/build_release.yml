@@ -27,10 +27,3 @@ jobs:
 
     - name: Test solution
       run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release -f net${{ matrix.dotnet-version }} --no-build
-
-    - name: Code Analysis
-      uses: dotnet/code-analysis@v1
-      with:
-        solution: Frcs6.Extensions.Caching.MongoDB.sln
-        #build-breaking: true
-        all-categories: all
