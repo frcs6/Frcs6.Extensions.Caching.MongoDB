@@ -1,6 +1,5 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-// TODO Scan for expired item
 internal sealed class MongoCache(
     ICacheItemBuilder _cacheItemBuilder,
     ICacheItemRepository _cacheItemRepository) : IDistributedCache
