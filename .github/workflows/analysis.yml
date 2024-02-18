@@ -7,20 +7,16 @@ on:
     paths-ignore: [ '**.md' ]
 
 jobs:
-  build_and_test:
+  analysis:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        dotnet-version: ['8.0']
- 
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
 
-    - name: Run .NET Code Analysis
-      uses: dotnet/code-analysis@v1
-      id: code-analysis
+    - name: Code Analysis
+      uses: dotnet/code-analysis@latest
       with:
-        solution: MySolution.sln
+        solution: Frcs6.Extensions.Caching.MongoDB.sln
         build-breaking: true
         all-categories: all
