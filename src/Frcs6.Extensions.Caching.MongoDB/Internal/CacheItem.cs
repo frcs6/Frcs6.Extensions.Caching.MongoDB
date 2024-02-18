@@ -2,8 +2,6 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-// TODO Remove ExpirationInSeconds
-// TODO Add ExpireAt
 internal sealed class CacheItem
 {
     [BsonId]

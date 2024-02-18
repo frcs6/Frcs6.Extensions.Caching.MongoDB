@@ -2,7 +2,6 @@
 
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-// TODO Need index
 internal sealed class CacheItemRepository : ICacheItemRepository
 {
     private static readonly ReplaceOptions DefaultReplaceOptions = new() { IsUpsert = true };
