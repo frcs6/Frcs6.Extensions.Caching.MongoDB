@@ -17,9 +17,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4.1.1
 
-    - name: Code Analysis
+    - name: Run .NET Code Analysis
       uses: dotnet/code-analysis@v1
+      id: code-analysis
       with:
-        solution: Frcs6.Extensions.Caching.MongoDB.sln
+        solution: MySolution.sln
         build-breaking: true
         all-categories: all
