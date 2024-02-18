@@ -26,7 +26,7 @@ public class CacheItemRepositoryTest : BaseTest
     [Fact]
     public void GivenNullKey_WhenReadAsync_ThenArgumentNullException()
     {
-        var act = () => _sut.ReadAsync(null!);
+        var act = () => _sut.ReadAsync(null!, default);
         act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -40,7 +40,7 @@ public class CacheItemRepositoryTest : BaseTest
     [Fact]
     public void GivenNullKey_WhenReadPartialAsync_ThenArgumentNullException()
     {
-        var act = () => _sut.ReadPartialAsync(null!);
+        var act = () => _sut.ReadPartialAsync(null!, default);
         act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -54,7 +54,7 @@ public class CacheItemRepositoryTest : BaseTest
     [Fact]
     public void GivenNullCacheItem_WhenWriteAsync_ThenArgumentNullException()
     {
-        var act = () => _sut.WriteAsync(null!);
+        var act = () => _sut.WriteAsync(null!, default);
         act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -68,7 +68,7 @@ public class CacheItemRepositoryTest : BaseTest
     [Fact]
     public void GivenNullCacheItem_WhenWritePartialAsync_ThenArgumentNullException()
     {
-        var act = () => _sut.WritePartialAsync(null!);
+        var act = () => _sut.WritePartialAsync(null!, default);
         act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -82,7 +82,7 @@ public class CacheItemRepositoryTest : BaseTest
     [Fact]
     public void GivenNullKey_WhenRemoveAsync_ThenArgumentNullException()
     {
-        var act = () => _sut.RemoveAsync(null!);
+        var act = () => _sut.RemoveAsync(null!, default);
         act.Should().ThrowAsync<ArgumentNullException>();
     }
 }

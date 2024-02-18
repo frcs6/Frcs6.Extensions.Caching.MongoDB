@@ -13,7 +13,7 @@ internal sealed class MongoCache(
     public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(key);
-        return await GetAndRefreshAsync(key, true).ConfigureAwait(false);
+        return await GetAndRefreshAsync(key, true, token).ConfigureAwait(false);
     }
 
     public void Refresh(string key)
@@ -25,7 +25,7 @@ internal sealed class MongoCache(
     public async Task RefreshAsync(string key, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(key);
-        await GetAndRefreshAsync(key, false).ConfigureAwait(false);
+        await GetAndRefreshAsync(key, false, token).ConfigureAwait(false);
     }
 
     public void Remove(string key)
@@ -39,7 +39,7 @@ internal sealed class MongoCache(
     {
         ArgumentNullException.ThrowIfNull(key);
         CleanExpired();
-        await _cacheItemRepository.RemoveAsync(key).ConfigureAwait(false);
+        await _cacheItemRepository.RemoveAsync(key, token).ConfigureAwait(false);
     }
 
     public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
@@ -47,7 +47,7 @@ internal sealed class MongoCache(
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(value);
         ArgumentNullException.ThrowIfNull(options);
-        
+
         CleanExpired();
         var cacheItem = _cacheItemBuilder.Build(key, value, options);
         _cacheItemRepository.Write(cacheItem);
@@ -61,7 +61,7 @@ internal sealed class MongoCache(
 
         CleanExpired();
         var cacheItem = _cacheItemBuilder.Build(key, value, options);
-        await _cacheItemRepository.WriteAsync(cacheItem).ConfigureAwait(false);
+        await _cacheItemRepository.WriteAsync(cacheItem, token).ConfigureAwait(false);
     }
 
     private byte[]? GetAndRefresh(string key, bool withData)
@@ -84,21 +84,21 @@ internal sealed class MongoCache(
         return cacheItem.Value?.ToArray() ?? null;
     }
 
-    private async Task<byte[]?> GetAndRefreshAsync(string key, bool withData)
+    private async Task<byte[]?> GetAndRefreshAsync(string key, bool withData, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(key);
 
-        CleanExpired();
+        await CleanExpiredAsync(token).ConfigureAwait(false);
 
         var cacheItem = await (withData ?
-            _cacheItemRepository.ReadAsync(key) :
-            _cacheItemRepository.ReadPartialAsync(key)).ConfigureAwait(false);
+            _cacheItemRepository.ReadAsync(key, token) :
+            _cacheItemRepository.ReadPartialAsync(key, token)).ConfigureAwait(false);
 
         if (cacheItem == null) return null;
 
         if (_cacheItemBuilder.Refresh(cacheItem))
         {
-            await _cacheItemRepository.WritePartialAsync(cacheItem).ConfigureAwait(false);
+            await _cacheItemRepository.WritePartialAsync(cacheItem, token).ConfigureAwait(false);
         }
 
         return cacheItem.Value?.ToArray() ?? null;
@@ -107,5 +107,10 @@ internal sealed class MongoCache(
     private void CleanExpired()
     {
         _cacheItemRepository.RemoveExpired();
+    }
+
+    private async Task CleanExpiredAsync(CancellationToken token)
+    {
+        await _cacheItemRepository.RemoveExpiredAsync(token).ConfigureAwait(false);
     }
 }

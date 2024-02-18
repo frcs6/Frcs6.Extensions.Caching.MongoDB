@@ -51,11 +51,11 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public async Task GiventCacheItem_WhenReadAsync_ThenReadCollection()
     {
         var cacheItem = _fixture.Create<CacheItem>();
-        var result = await _sut.ReadAsync(cacheItem.Key!);
+        var result = await _sut.ReadAsync(cacheItem.Key!, default);
         result.Should().BeNull();
 
         await _cacheItemCollection.InsertOneAsync(cacheItem);
-        result = await _sut.ReadAsync(cacheItem.Key!);
+        result = await _sut.ReadAsync(cacheItem.Key!, default);
         result.Should().BeEquivalentTo(cacheItem);
     }
 
@@ -75,7 +75,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     {
         var cacheItem = _fixture.Create<CacheItem>();
 
-        await _sut.WriteAsync(cacheItem);
+        await _sut.WriteAsync(cacheItem, default);
 
         var result = await _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleAsync();
         result.Should().BeEquivalentTo(cacheItem);
@@ -104,12 +104,12 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public async Task GiventCacheItem_WhenReadPartialAsync_ThenReadCollection()
     {
         var cacheItem = _fixture.Create<CacheItem>();
-        var result = await _sut.ReadPartialAsync(cacheItem.Key!);
+        var result = await _sut.ReadPartialAsync(cacheItem.Key!, default);
         result.Should().BeNull();
 
         await _cacheItemCollection.InsertOneAsync(cacheItem);
 
-        result = await _sut.ReadPartialAsync(cacheItem.Key!);
+        result = await _sut.ReadPartialAsync(cacheItem.Key!, default);
         using (new AssertionScope())
         {
             result.Value.Should().BeNull();
@@ -156,7 +156,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
             .Without(i => i.Value)
             .Create();
 
-        await _sut.WritePartialAsync(newCacheItem);
+        await _sut.WritePartialAsync(newCacheItem, default);
 
         var result = await _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleAsync();
         using (new AssertionScope())
@@ -187,7 +187,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     {
         var cacheItem = _fixture.Create<CacheItem>();
 
-        await _sut.WritePartialAsync(cacheItem);
+        await _sut.WritePartialAsync(cacheItem, default);
 
         var result = await _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleOrDefaultAsync();
         result.Should().BeNull();
@@ -211,7 +211,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
         var cacheItem = _fixture.Create<CacheItem>();
         await _cacheItemCollection.InsertOneAsync(cacheItem);
 
-        await _sut.RemoveAsync(cacheItem.Key!);
+        await _sut.RemoveAsync(cacheItem.Key!, default);
 
         var result = await _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleOrDefaultAsync();
         result.Should().BeNull();

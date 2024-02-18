@@ -79,39 +79,41 @@ public partial class MongoCacheTest
     [Fact]
     public async Task GivenKey_WhenGetAsync_ThenRead()
     {
+        var token = CancellationToken.None;
         await _sut.GetAsync(_key);
-        _cacheItemRepository.Verify(r => r.ReadAsync(_key), Times.Once);
-        _cacheItemRepository.Verify(r => r.RemoveExpired(), Times.Once);
+        _cacheItemRepository.Verify(r => r.ReadAsync(_key, token), Times.Once);
     }
 
     [Fact]
     public async Task GivenKey_WhenGetAsync_ThenRemoveExpired()
     {
-        await _sut.GetAsync(_key);
-        _cacheItemRepository.Verify(r => r.RemoveExpired(), Times.Once);
+        var token = CancellationToken.None;
+        await _sut.GetAsync(_key, token);
+        _cacheItemRepository.Verify(r => r.RemoveExpiredAsync(token), Times.Once);
     }
 
     [Fact]
     public async Task GivenKey_WhenGetAsync_ThenRefreshCacheItem()
     {
-        _cacheItemRepository.Setup(r => r.ReadAsync(_key)).ReturnsAsync(_cacheItem);
-        await _sut.GetAsync(_key);
+        _cacheItemRepository.Setup(r => r.ReadAsync(_key, default)).ReturnsAsync(_cacheItem);
+        await _sut.GetAsync(_key, default);
         _cacheItemBuilder.Verify(r => r.Refresh(_cacheItem), Times.Once);
     }
 
     [Fact]
     public async Task GivenKey_WhenGetAsync_ThenNoSaveUnrefreshedCacheItem()
     {
-        _cacheItemRepository.Setup(r => r.ReadAsync(_key)).ReturnsAsync(_cacheItem);
+        var token = CancellationToken.None;
+        _cacheItemRepository.Setup(r => r.ReadAsync(_key, token)).ReturnsAsync(_cacheItem);
         _cacheItemBuilder.Setup(r => r.Refresh(_cacheItem)).Returns(false);
         await _sut.GetAsync(_key);
-        _cacheItemRepository.Verify(r => r.WritePartialAsync(_cacheItem), Times.Never);
+        _cacheItemRepository.Verify(r => r.WritePartialAsync(_cacheItem, token), Times.Never);
     }
 
     [Fact]
     public async Task GivenKey_WhenGetAsync_ThenReturnValue()
     {
-        _cacheItemRepository.Setup(r => r.ReadAsync(_key)).ReturnsAsync(_cacheItem);
+        _cacheItemRepository.Setup(r => r.ReadAsync(_key, default)).ReturnsAsync(_cacheItem);
         var result = await _sut.GetAsync(_key);
         result.Should().BeEquivalentTo(_value);
     }
@@ -191,9 +193,10 @@ public partial class MongoCacheTest
     [Fact]
     public async Task GivenArguments_WhenSetAsync_ThenWriteCacheItem()
     {
+        var token = CancellationToken.None;
         _cacheItemBuilder.Setup(b => b.Build(_key, _value, _options)).Returns(_cacheItem);
-        await _sut.SetAsync(_key, _value, _options);
-        _cacheItemRepository.Verify(r => r.WriteAsync(_cacheItem), Times.Once);
+        await _sut.SetAsync(_key, _value, _options, token);
+        _cacheItemRepository.Verify(r => r.WriteAsync(_cacheItem, token), Times.Once);
     }
 
     [Fact]
@@ -244,21 +247,23 @@ public partial class MongoCacheTest
     [Fact]
     public async Task GivenKey_WhenRefreshAsync_ThenReadPartial()
     {
-        await _sut.RefreshAsync(_key);
-        _cacheItemRepository.Verify(r => r.ReadPartialAsync(_key), Times.Once);
+        var token = CancellationToken.None;
+        await _sut.RefreshAsync(_key, token);
+        _cacheItemRepository.Verify(r => r.ReadPartialAsync(_key, token), Times.Once);
     }
 
     [Fact]
     public async Task GivenKey_WhenRefreshAsync_ThenRemoveExpired()
     {
-        await _sut.RefreshAsync(_key);
-        _cacheItemRepository.Verify(r => r.RemoveExpired(), Times.Once);
+        var token = CancellationToken.None;
+        await _sut.RefreshAsync(_key, token);
+        _cacheItemRepository.Verify(r => r.RemoveExpiredAsync(token), Times.Once);
     }
 
     [Fact]
     public async Task GivenKey_WhenRefreshAsync_ThenRefreshCacheItem()
     {
-        _cacheItemRepository.Setup(r => r.ReadPartialAsync(_key)).ReturnsAsync(_cacheItem);
+        _cacheItemRepository.Setup(r => r.ReadPartialAsync(_key, default)).ReturnsAsync(_cacheItem);
         await _sut.RefreshAsync(_key);
         _cacheItemBuilder.Verify(r => r.Refresh(_cacheItem), Times.Once);
     }
@@ -266,10 +271,11 @@ public partial class MongoCacheTest
     [Fact]
     public async Task GivenKey_WhenRefreshAsync_ThenNoSaveUnrefreshedCacheItem()
     {
-        _cacheItemRepository.Setup(r => r.ReadPartialAsync(_key)).ReturnsAsync(_cacheItem);
+        var token = CancellationToken.None;
+        _cacheItemRepository.Setup(r => r.ReadPartialAsync(_key, token)).ReturnsAsync(_cacheItem);
         _cacheItemBuilder.Setup(r => r.Refresh(_cacheItem)).Returns(false);
         await _sut.RefreshAsync(_key);
-        _cacheItemRepository.Verify(r => r.WritePartialAsync(_cacheItem), Times.Never);
+        _cacheItemRepository.Verify(r => r.WritePartialAsync(_cacheItem, token), Times.Never);
     }
 
     [Fact]
@@ -303,8 +309,9 @@ public partial class MongoCacheTest
     [Fact]
     public async Task GivenKey_WhenRemoveAsync_ThenRemove()
     {
+        var token = CancellationToken.None;
         await _sut.RemoveAsync(_key);
-        _cacheItemRepository.Verify(r => r.RemoveAsync(_key), Times.Once);
+        _cacheItemRepository.Verify(r => r.RemoveAsync(_key, token), Times.Once);
     }
 
     [Fact]

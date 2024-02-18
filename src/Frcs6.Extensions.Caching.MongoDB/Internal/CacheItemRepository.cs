@@ -28,12 +28,12 @@ internal sealed class CacheItemRepository : ICacheItemRepository
             .SingleOrDefault();
     }
 
-    public async Task<CacheItem> ReadAsync(string key)
+    public async Task<CacheItem> ReadAsync(string key, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(key);
         return await _cacheItemCollection
             .Find(FindByKey(key))
-            .SingleOrDefaultAsync()
+            .SingleOrDefaultAsync(token)
             .ConfigureAwait(false);
     }
 
@@ -46,13 +46,13 @@ internal sealed class CacheItemRepository : ICacheItemRepository
             .SingleOrDefault();
     }
 
-    public async Task<CacheItem> ReadPartialAsync(string key)
+    public async Task<CacheItem> ReadPartialAsync(string key, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(key);
         return await _cacheItemCollection
             .Find(FindByKey(key))
             .Project<CacheItem>(Builders<CacheItem>.Projection.Exclude(x => x.Value))
-            .SingleOrDefaultAsync()
+            .SingleOrDefaultAsync(token)
             .ConfigureAwait(false);
     }
 
@@ -62,11 +62,11 @@ internal sealed class CacheItemRepository : ICacheItemRepository
         _cacheItemCollection.ReplaceOne(FindByKey(cacheItem.Key!), cacheItem, DefaultReplaceOptions);
     }
 
-    public async Task WriteAsync(CacheItem cacheItem)
+    public async Task WriteAsync(CacheItem cacheItem, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(cacheItem);
         await _cacheItemCollection
-            .ReplaceOneAsync(FindByKey(cacheItem.Key!), cacheItem, DefaultReplaceOptions)
+            .ReplaceOneAsync(FindByKey(cacheItem.Key!), cacheItem, DefaultReplaceOptions, token)
             .ConfigureAwait(false);
     }
 
@@ -82,7 +82,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository
             DefaultUpdateOptions);
     }
 
-    public async Task WritePartialAsync(CacheItem cacheItem)
+    public async Task WritePartialAsync(CacheItem cacheItem, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(cacheItem);
         await _cacheItemCollection.UpdateOneAsync(
@@ -91,7 +91,8 @@ internal sealed class CacheItemRepository : ICacheItemRepository
                 .Set(c => c.AbsoluteExpiration, cacheItem.AbsoluteExpiration)
                 .Set(c => c.ExpireAt, cacheItem.ExpireAt)
                 .Set(c => c.SlidingExpiration, cacheItem.SlidingExpiration),
-            DefaultUpdateOptions).ConfigureAwait(false);
+            DefaultUpdateOptions,
+            token).ConfigureAwait(false);
     }
 
     public void Remove(string key)
@@ -100,16 +101,19 @@ internal sealed class CacheItemRepository : ICacheItemRepository
         _cacheItemCollection.DeleteOne(FindByKey(key));
     }
 
-    public async Task RemoveAsync(string key)
+    public async Task RemoveAsync(string key, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(key);
         await _cacheItemCollection
-            .DeleteOneAsync(FindByKey(key))
+            .DeleteOneAsync(FindByKey(key), token)
             .ConfigureAwait(false);
     }
 
     public void RemoveExpired()
         => _cacheItemCollection.DeleteMany(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks));
+
+    public Task RemoveExpiredAsync(CancellationToken token)
+        => _cacheItemCollection.DeleteManyAsync(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks), token);
 
     private static FilterDefinition<CacheItem> FindByKey(string key)
          => Builders<CacheItem>.Filter.Eq(i => i.Key, key);
