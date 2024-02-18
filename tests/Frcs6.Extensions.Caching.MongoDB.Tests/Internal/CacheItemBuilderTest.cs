@@ -1,26 +1,21 @@
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Tests.Internal;
 
-public class CacheItemBuilderTest
+public class CacheItemBuilderTest : BaseTest
 {
-    private readonly Fixture _fixture = new();
-
-    private readonly string _key;
-    private readonly byte[] _value;
     private DateTimeOffset _utcNow;
+    private IOptions<MongoCacheOptions> _mongoCacheOptions;
 
     private readonly FakeTimeProvider _timeProvider = new();
     private readonly CacheItemBuilder _sut;
 
     public CacheItemBuilderTest()
     {
-        _key = _fixture.Create<string>();
-        _value = _fixture.CreateMany<byte>().ToArray();
-
         ConfigureUtcNow(DateTimeOffset.UtcNow);
-
-        _sut = new CacheItemBuilder(_timeProvider);
+        _mongoCacheOptions = BuildMongoCacheOptions();
+        _sut = new CacheItemBuilder(_timeProvider, _mongoCacheOptions);
     }
 
     [Theory]
@@ -32,9 +27,9 @@ public class CacheItemBuilderTest
         bool valueIsNull,
         bool optionsIsNull)
     {
-        var key = keyIsNull ? null : _key;
-        var value = valueIsNull ? null : _value;
-        var options = optionsIsNull ? null : _fixture.Create<DistributedCacheEntryOptions>();
+        var key = keyIsNull ? null : DefaultKey;
+        var value = valueIsNull ? null : DefaultValue;
+        var options = optionsIsNull ? null : Fixture.Create<DistributedCacheEntryOptions>();
 
         var act = () => _sut.Build(key!, value!, options!);
 
@@ -47,13 +42,13 @@ public class CacheItemBuilderTest
         var options = new DistributedCacheEntryOptions()
             .SetAbsoluteExpiration(_utcNow.AddHours(-1));
 
-        var act = () => _sut.Build(_key, _value, options);
+        var act = () => _sut.Build(DefaultKey, DefaultValue, options);
 
         act.Should().Throw<ArgumentOutOfRangeException>();
     }
 
     [Fact]
-    public void GiveKeyValueAbsoluteExpiration_WhenBuild_ReturnCacheItem()
+    public void GiveKeyValueAbsoluteExpiration_WhenBuild_ThenReturnCacheItem()
     {
         var expiration = TimeSpan.FromHours(1);
         var options = new DistributedCacheEntryOptions()
@@ -61,31 +56,40 @@ public class CacheItemBuilderTest
 
         var expected = new CacheItem
         {
-            Key = _key,
-            Value = _value,
+            Key = DefaultKey,
+            Value = DefaultValue,
             AbsoluteExpiration = options.AbsoluteExpiration!.Value.Ticks,
             ExpireAt = (_utcNow + expiration).Ticks
         };
 
-        var result = _sut.Build(_key, _value, options);
+        var result = _sut.Build(DefaultKey, DefaultValue, options);
 
         result.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
-    public void GivenKeyValueNoOptions_WhenBuild_ThrowArgumentOutOfRangeException()
+    public void GivenKeyValueNoOptions_WhenBuild_ThenReturnCacheItem()
     {
         var options = new DistributedCacheEntryOptions();
 
         var expected = new CacheItem
         {
-            Key = _key,
-            Value = _value
+            Key = DefaultKey,
+            Value = DefaultValue
         };
 
-        var result = _sut.Build(_key, _value, options);
+        var result = _sut.Build(DefaultKey, DefaultValue, options);
 
         result.Should().BeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public void GivenNoExpirationNotAllow_WhenBuild_ThrowInvalidOperationException()
+    {
+        _mongoCacheOptions.Value.AllowNoExpiration = false;
+        var options = new DistributedCacheEntryOptions();
+        var act = () => _sut.Build(DefaultKey, DefaultValue, options);
+        act.Should().Throw<InvalidOperationException>();
     }
 
     [Fact]
@@ -97,13 +101,13 @@ public class CacheItemBuilderTest
 
         var expected = new CacheItem
         {
-            Key = _key,
-            Value = _value,
+            Key = DefaultKey,
+            Value = DefaultValue,
             AbsoluteExpiration = (_utcNow + options.AbsoluteExpirationRelativeToNow!.Value).Ticks,
             ExpireAt = (_utcNow + expiration).Ticks
         };
 
-        var result = _sut.Build(_key, _value, options);
+        var result = _sut.Build(DefaultKey, DefaultValue, options);
 
         result.Should().BeEquivalentTo(expected);
     }
@@ -117,13 +121,13 @@ public class CacheItemBuilderTest
 
         var expected = new CacheItem
         {
-            Key = _key,
-            Value = _value,
+            Key = DefaultKey,
+            Value = DefaultValue,
             SlidingExpiration = options.SlidingExpiration!.Value.Ticks,
             ExpireAt = (_utcNow + expiration).Ticks
         };
 
-        var result = _sut.Build(_key, _value, options);
+        var result = _sut.Build(DefaultKey, DefaultValue, options);
 
         result.Should().BeEquivalentTo(expected);
     }
@@ -139,14 +143,14 @@ public class CacheItemBuilderTest
 
         var expected = new CacheItem
         {
-            Key = _key,
-            Value = _value,
+            Key = DefaultKey,
+            Value = DefaultValue,
             AbsoluteExpiration = (_utcNow + options.AbsoluteExpirationRelativeToNow!.Value).Ticks,
             SlidingExpiration = options.SlidingExpiration!.Value.Ticks,
             ExpireAt = (_utcNow + expiration1).Ticks
         };
 
-        var result = _sut.Build(_key, _value, options);
+        var result = _sut.Build(DefaultKey, DefaultValue, options);
 
         result.Should().BeEquivalentTo(expected);
     }
@@ -162,14 +166,14 @@ public class CacheItemBuilderTest
 
         var expected = new CacheItem
         {
-            Key = _key,
-            Value = _value,
+            Key = DefaultKey,
+            Value = DefaultValue,
             AbsoluteExpiration = (_utcNow + options.AbsoluteExpirationRelativeToNow!.Value).Ticks,
             SlidingExpiration = options.SlidingExpiration!.Value.Ticks,
             ExpireAt = (_utcNow + expiration2).Ticks
         };
 
-        var result = _sut.Build(_key, _value, options);
+        var result = _sut.Build(DefaultKey, DefaultValue, options);
 
         result.Should().BeEquivalentTo(expected);
     }

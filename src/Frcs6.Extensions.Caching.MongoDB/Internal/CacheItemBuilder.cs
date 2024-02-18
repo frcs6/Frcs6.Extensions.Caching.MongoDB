@@ -1,7 +1,11 @@
 
+using Microsoft.Extensions.Options;
+
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-internal sealed class CacheItemBuilder(TimeProvider timeProvider) : ICacheItemBuilder
+internal sealed class CacheItemBuilder(
+    TimeProvider timeProvider,
+    IOptions<MongoCacheOptions> mongoCacheOptions) : ICacheItemBuilder
 {
     public CacheItem Build(string key, byte[] value, DistributedCacheEntryOptions options)
     {
@@ -49,7 +53,7 @@ internal sealed class CacheItemBuilder(TimeProvider timeProvider) : ICacheItemBu
         return false;
     }
 
-    private static double? GetExpirationInSeconds(DateTimeOffset creationTime, DateTimeOffset? absoluteExpiration, DistributedCacheEntryOptions options)
+    private double? GetExpirationInSeconds(DateTimeOffset creationTime, DateTimeOffset? absoluteExpiration, DistributedCacheEntryOptions options)
     {
         if (absoluteExpiration.HasValue && options.SlidingExpiration.HasValue)
         {
@@ -63,6 +67,12 @@ internal sealed class CacheItemBuilder(TimeProvider timeProvider) : ICacheItemBu
         {
             return options.SlidingExpiration.Value.TotalSeconds;
         }
+
+        if(!mongoCacheOptions.Value.AllowNoExpiration)
+        {
+            throw new InvalidOperationException("Cache without expiration is not allowed");
+        }
+
         return null;
     }
 

@@ -1,13 +1,9 @@
-﻿using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Time.Testing;
+﻿using Microsoft.Extensions.Time.Testing;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Tests.Internal;
 
-public class CacheItemRepositoryTest
+public class CacheItemRepositoryTest : BaseTest
 {
-    private const string DatabaseName = "TestDatabase";
-    private const string CollectionName = "CacheCollection";
-
     private readonly Mock<IMongoClient> _mongoClient = new();
     private readonly Mock<IMongoDatabase> _mongoDatabase = new();
     private readonly Mock<IMongoCollection<CacheItem>> _mongoCollection = new();
@@ -17,9 +13,7 @@ public class CacheItemRepositoryTest
     {
         _mongoClient.Setup(c => c.GetDatabase(DatabaseName, null)).Returns(_mongoDatabase.Object);
         _mongoDatabase.Setup(d => d.GetCollection<CacheItem>(CollectionName, null)).Returns(_mongoCollection.Object);
-
-        var mongoCacheOptions = Options.Create(new MongoCacheOptions { DatabaseName = DatabaseName, CollectionName = CollectionName });
-        _sut = new CacheItemRepository(_mongoClient.Object, new FakeTimeProvider(), mongoCacheOptions);
+        _sut = new CacheItemRepository(_mongoClient.Object, new FakeTimeProvider(), BuildMongoCacheOptions());
     }
 
     [Fact]
@@ -76,8 +70,8 @@ public class CacheItemRepositoryTest
     {
         var act = () => _sut.WritePartialAsync(null!);
         act.Should().ThrowAsync<ArgumentNullException>();
-    }    
-    
+    }
+
     [Fact]
     public void GivenNullKey_WhenRemove_ThenArgumentNullException()
     {
