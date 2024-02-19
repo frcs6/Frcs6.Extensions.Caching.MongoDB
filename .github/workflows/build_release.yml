@@ -23,7 +23,7 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}.x
 
     - name: Restore solution
-      run: dotnet restore Frcs6.Extensions.Caching.MongoDB.sln -f net${{ matrix.dotnet-version }}
+      run: dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
 
     - name: Build solution
       run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release -f net${{ matrix.dotnet-version }} --no-restore
