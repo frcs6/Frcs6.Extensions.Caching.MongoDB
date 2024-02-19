@@ -23,10 +23,7 @@
             ],
             "group": {
                 "kind": "test"
-            },
-            "dependsOn": [
-                "Clear coverage"
-            ]
+            }
         },
         {
             "label": "Run Integrated tests",
@@ -38,31 +35,10 @@
                 "/p:CollectCoverage=true",
                 "/p:CoverletOutputFormat=lcov",
                 "/p:CoverletOutput=${workspaceFolder}/TestResult/lcov.info",
-                "/p:MergeWith==${workspaceFolder}/TestResult/lcov.info"
             ],
             "group": {
                 "kind": "test"
-            },
-            "dependsOn": [
-                "Clear coverage"
-            ]
-        },
-        {
-            "label": "Run All tests",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "test",
-                "/p:CollectCoverage=true",
-                "/p:CoverletOutputFormat=lcov",
-                "/p:CoverletOutput=${workspaceFolder}/TestResult/lcov.info"
-            ],
-            "group": {
-                "kind": "test"
-            },
-            "dependsOn": [
-                "Clear coverage"
-            ]
+            }
         },
         {
             "label": "Run Stryker",
@@ -74,11 +50,6 @@
             "group": {
                 "kind": "test"
             }
-        },
-        {
-            "command": "rm -rf ${workspaceFolder}/TestResult",
-            "label": "Clear coverage",
-            "type": "shell"
         }
     ]
 }
