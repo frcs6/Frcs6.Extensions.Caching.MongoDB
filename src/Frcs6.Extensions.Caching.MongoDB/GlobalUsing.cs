@@ -2,6 +2,7 @@
 global using Microsoft.Extensions.Caching.Distributed;
 global using MongoDB.Driver;
 global using System.Diagnostics.CodeAnalysis;
+
 #if !NET8_0_OR_GREATER
 global using Microsoft.Extensions.Internal;
 #endif

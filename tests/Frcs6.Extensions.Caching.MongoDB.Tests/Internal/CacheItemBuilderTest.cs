@@ -96,7 +96,7 @@ public class CacheItemBuilderTest : BaseTest
         _mongoCacheOptions.Value.AllowNoExpiration = false;
         var options = new DistributedCacheEntryOptions();
         var act = () => _sut.Build(DefaultKey, DefaultValue, options);
-        act.Should().Throw<InvalidOperationException>();
+        act.Should().Throw<InvalidOperationException>().WithMessage("Cache without expiration is not allowed");
     }
 
     [Fact]
@@ -186,6 +186,13 @@ public class CacheItemBuilderTest : BaseTest
     }
 
     [Fact]
+    public void GivenNullCacheItem_WhenRefresh_ThenArgumentNullException()
+    {
+        var act = () => _sut.Refresh(null!);
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
     public void GivenNoSlidingExpiration_WhenRefresh_ThenDoNothingAndReturnFalse()
     {
         var cacheItem = new CacheItem();
@@ -243,7 +250,7 @@ public class CacheItemBuilderTest : BaseTest
     }
 
     [Fact]
-    public void GivenAbsoluteExpirationThenSlidingExpirationLess_WhenRefresh_ThenUpdateAndReturnTrue()
+    public void GivenAbsoluteExpirationLessThenSlidingExpiration_WhenRefresh_ThenUpdateAndReturnTrue()
     {
         var slidingExpiration = TimeSpan.FromMinutes(10);
         var absoluteExpiration = _utcNow.AddMinutes(20);

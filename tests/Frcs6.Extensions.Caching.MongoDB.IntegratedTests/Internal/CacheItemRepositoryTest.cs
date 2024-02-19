@@ -253,6 +253,35 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
         }
     }
 
+    [Fact]
+    public async Task GiventCacheItem_WhenRemoveExpiredAsync_ThenRemoveCollection()
+    {
+        var cacheItems = _fixture
+            .Build<CacheItem>()
+            .With(i => i.ExpireAt, _utcNow.AddHours(10).Ticks)
+            .CreateMany(12)
+            .ToList();
+        await _cacheItemCollection.InsertManyAsync(cacheItems);
+
+        var expiredCacheItems = _fixture
+            .Build<CacheItem>()
+            .With(i => i.ExpireAt, _utcNow.AddHours(-10).Ticks)
+            .CreateMany(12)
+            .ToList();
+        await _cacheItemCollection.InsertManyAsync(expiredCacheItems);
+
+        await _sut.RemoveExpiredAsync(default);
+
+        using (new AssertionScope())
+        {
+            foreach (var cacheItem in cacheItems)
+                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(1);
+
+            foreach (var cacheItem in expiredCacheItems)
+                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(0);
+        }
+    }
+
     private void ConfigureUtcNow(DateTimeOffset utcNow)
     {
         _utcNow = utcNow;
