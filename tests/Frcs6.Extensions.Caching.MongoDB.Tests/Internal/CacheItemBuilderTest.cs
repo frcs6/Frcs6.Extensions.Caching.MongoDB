@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Time.Testing;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Tests.Internal;
 
@@ -8,14 +7,22 @@ public class CacheItemBuilderTest : BaseTest
     private DateTimeOffset _utcNow;
     private IOptions<MongoCacheOptions> _mongoCacheOptions;
 
+#if NET8_0_OR_GREATER
     private readonly FakeTimeProvider _timeProvider = new();
+#else
+    private readonly Mock<ISystemClock> _timeProvider = new();
+#endif
     private readonly CacheItemBuilder _sut;
 
     public CacheItemBuilderTest()
     {
         ConfigureUtcNow(DateTimeOffset.UtcNow);
         _mongoCacheOptions = BuildMongoCacheOptions();
+#if NET8_0_OR_GREATER
         _sut = new CacheItemBuilder(_timeProvider, _mongoCacheOptions);
+#else
+        _sut = new CacheItemBuilder(_timeProvider.Object, _mongoCacheOptions);
+#endif
     }
 
     [Theory]
@@ -261,6 +268,10 @@ public class CacheItemBuilderTest : BaseTest
     private void ConfigureUtcNow(DateTimeOffset utcNow)
     {
         _utcNow = utcNow;
+#if NET8_0_OR_GREATER
         _timeProvider.SetUtcNow(utcNow);
+#else
+        _timeProvider.SetupGet(p => p.UtcNow).Returns(utcNow);
+#endif
     }
 }

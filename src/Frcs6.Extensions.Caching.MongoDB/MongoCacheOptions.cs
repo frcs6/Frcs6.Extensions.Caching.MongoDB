@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Frcs6.Extensions.Caching.MongoDB;
 
 [ExcludeFromCodeCoverage]

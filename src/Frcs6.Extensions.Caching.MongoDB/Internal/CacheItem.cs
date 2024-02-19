@@ -2,6 +2,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
+[ExcludeFromCodeCoverage]
 internal sealed class CacheItem
 {
     [BsonId]

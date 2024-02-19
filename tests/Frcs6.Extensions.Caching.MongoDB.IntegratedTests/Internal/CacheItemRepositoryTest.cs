@@ -1,7 +1,6 @@
 using FluentAssertions.Execution;
 using Frcs6.Extensions.Caching.MongoDB.Tests.Common;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Time.Testing;
 
 namespace Frcs6.Extensions.Caching.MongoDB.IntegratedTests.Internal;
 
@@ -15,7 +14,11 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     private DateTimeOffset _utcNow;
 
     private readonly IMongoCollection<CacheItem> _cacheItemCollection;
+#if NET8_0_OR_GREATER
     private readonly FakeTimeProvider _timeProvider = new();
+#else
+    private readonly Mock<ISystemClock> _timeProvider = new();
+#endif
     private readonly CacheItemRepository _sut;
 
     public CacheItemRepositoryTest(MongoDatabaseFixture mongoDatabase)
@@ -32,7 +35,11 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
             DatabaseName = DatabaseName,
             CollectionName = CollectionName
         });
+#if NET8_0_OR_GREATER
         _sut = new CacheItemRepository(mongoClient, _timeProvider, mongoCacheOptions);
+#else
+        _sut = new CacheItemRepository(mongoClient, _timeProvider.Object, mongoCacheOptions);
+#endif
     }
 
     [Fact]
@@ -249,6 +256,10 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     private void ConfigureUtcNow(DateTimeOffset utcNow)
     {
         _utcNow = utcNow;
+#if NET8_0_OR_GREATER
         _timeProvider.SetUtcNow(utcNow);
+#else
+        _timeProvider.SetupGet(p => p.UtcNow).Returns(utcNow);
+#endif
     }
 }
