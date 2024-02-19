@@ -6,11 +6,11 @@ on:
     paths-ignore: [ '**.md' ]
 
 jobs:
-  build_and_test:
+  pr_build_and_test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['8.0']
+        dotnet-version: ['6.0', '7.0', '8.0']
  
     steps:
     - name: Checkout
@@ -21,8 +21,11 @@ jobs:
       with:
         dotnet-version: ${{ matrix.dotnet-version }}.x
 
+    - name: Restore solution
+      run: dotnet restore Frcs6.Extensions.Caching.MongoDB.sln -c Release -f net${{ matrix.dotnet-version }}
+
     - name: Build solution
-      run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release -f net${{ matrix.dotnet-version }}
+      run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release -f net${{ matrix.dotnet-version }} --no-restore
 
     - name: Test solution
       run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release -f net${{ matrix.dotnet-version }} --no-build
