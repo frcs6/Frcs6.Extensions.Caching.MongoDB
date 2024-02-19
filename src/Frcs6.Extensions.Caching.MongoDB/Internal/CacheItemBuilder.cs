@@ -3,17 +3,33 @@ using Microsoft.Extensions.Options;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
+#if NET8_0_OR_GREATER
 internal sealed class CacheItemBuilder(
-    TimeProvider timeProvider,
-    IOptions<MongoCacheOptions> mongoCacheOptions) : ICacheItemBuilder
+    TimeProvider _timeProvider,
+    IOptions<MongoCacheOptions> _mongoCacheOptions) : ICacheItemBuilder
 {
+    private readonly TimeProvider _timeProvider = _timeProvider;
+    private readonly IOptions<MongoCacheOptions> _mongoCacheOptions = _mongoCacheOptions;
+#else
+internal sealed class CacheItemBuilder : ICacheItemBuilder
+{
+    private readonly ISystemClock _timeProvider;
+    private readonly IOptions<MongoCacheOptions> _mongoCacheOptions;
+
+    public CacheItemBuilder(ISystemClock timeProvider, IOptions<MongoCacheOptions> mongoCacheOptions)
+    {
+        _timeProvider = timeProvider;
+        _mongoCacheOptions = mongoCacheOptions;
+    }
+#endif
+
     public CacheItem Build(string key, byte[] value, DistributedCacheEntryOptions options)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(value);
         ArgumentNullException.ThrowIfNull(options);
 
-        var creationTime = timeProvider.GetUtcNow();
+        var creationTime = _timeProvider.GetUtcNow();
         var absoluteExpiration = GetAbsoluteExpiration(creationTime, options);
         var expirationInSeconds = GetExpirationInSeconds(creationTime, absoluteExpiration, options);
         DateTimeOffset? expireAt = expirationInSeconds.HasValue ? creationTime.AddSeconds(expirationInSeconds.Value) : null;
@@ -28,7 +44,7 @@ internal sealed class CacheItemBuilder(
     {
         ArgumentNullException.ThrowIfNull(cacheItem);
 
-        var utcNow = timeProvider.GetUtcNow();
+        var utcNow = _timeProvider.GetUtcNow();
         var absoluteExpiration = cacheItem.GetAbsoluteExpiration();
         var slidingExpiration = cacheItem.GetSlidingExpiration();
 
@@ -68,7 +84,7 @@ internal sealed class CacheItemBuilder(
             return options.SlidingExpiration.Value.TotalSeconds;
         }
 
-        if(!mongoCacheOptions.Value.AllowNoExpiration)
+        if (!_mongoCacheOptions.Value.AllowNoExpiration)
         {
             throw new InvalidOperationException("Cache without expiration is not allowed");
         }
@@ -80,7 +96,7 @@ internal sealed class CacheItemBuilder(
     {
         if (options.AbsoluteExpiration.HasValue)
         {
-            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(options.AbsoluteExpiration.Value, creationTime);
+            ArgumentThrowHelper.ThrowIfLessThanOrEqual(options.AbsoluteExpiration.Value, creationTime);
         }
         if (options.AbsoluteExpirationRelativeToNow.HasValue)
         {

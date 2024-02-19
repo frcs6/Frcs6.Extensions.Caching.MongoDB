@@ -8,16 +8,29 @@ internal sealed class CacheItemRepository : ICacheItemRepository
     private static readonly UpdateOptions DefaultUpdateOptions = new() { IsUpsert = false };
 
     private readonly IMongoCollection<CacheItem> _cacheItemCollection;
+
+#if NET8_0_OR_GREATER
     private readonly TimeProvider _timeProvider;
+#else
+    private readonly ISystemClock _timeProvider;
+#endif
 
     public CacheItemRepository(
             IMongoClient mongoClient,
+#if NET8_0_OR_GREATER
             TimeProvider timeProvider,
+#else
+            ISystemClock timeProvider,
+#endif
             IOptions<MongoCacheOptions> mongoCacheOptions)
     {
         ValidateOptions(mongoCacheOptions.Value);
         _cacheItemCollection = GetCollection(mongoClient, mongoCacheOptions.Value);
+#if NET8_0_OR_GREATER
         _timeProvider = timeProvider;
+#else
+        _timeProvider = timeProvider;
+#endif
     }
 
     public CacheItem Read(string key)
@@ -125,7 +138,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository
 
     private static void ValidateOptions(MongoCacheOptions mongoCacheOptions)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(mongoCacheOptions.DatabaseName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(mongoCacheOptions.CollectionName);
+        ArgumentThrowHelper.ThrowIfNullOrWhiteSpace(mongoCacheOptions.DatabaseName);
+        ArgumentThrowHelper.ThrowIfNullOrWhiteSpace(mongoCacheOptions.CollectionName);
     }
 }

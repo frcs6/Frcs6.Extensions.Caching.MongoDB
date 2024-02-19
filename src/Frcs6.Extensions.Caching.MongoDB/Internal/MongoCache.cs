@@ -1,9 +1,25 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
+#if NET8_0_OR_GREATER
 internal sealed class MongoCache(
     ICacheItemBuilder _cacheItemBuilder,
     ICacheItemRepository _cacheItemRepository) : IDistributedCache
 {
+    private readonly ICacheItemBuilder _cacheItemBuilder = _cacheItemBuilder;
+    private readonly ICacheItemRepository _cacheItemRepository = _cacheItemRepository;
+#else
+internal sealed class MongoCache : IDistributedCache
+{
+    private readonly ICacheItemBuilder _cacheItemBuilder;
+    private readonly ICacheItemRepository _cacheItemRepository;
+
+    public MongoCache(ICacheItemBuilder cacheItemBuilder, ICacheItemRepository cacheItemRepository)
+    {
+        _cacheItemBuilder = cacheItemBuilder;
+        _cacheItemRepository = cacheItemRepository;
+    }
+#endif
+
     public byte[]? Get(string key)
     {
         ArgumentNullException.ThrowIfNull(key);

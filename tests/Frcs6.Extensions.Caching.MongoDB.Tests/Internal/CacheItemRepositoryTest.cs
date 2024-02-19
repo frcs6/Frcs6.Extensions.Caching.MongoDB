@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Time.Testing;
-
-namespace Frcs6.Extensions.Caching.MongoDB.Tests.Internal;
+﻿namespace Frcs6.Extensions.Caching.MongoDB.Tests.Internal;
 
 public class CacheItemRepositoryTest : BaseTest
 {
@@ -13,7 +11,11 @@ public class CacheItemRepositoryTest : BaseTest
     {
         _mongoClient.Setup(c => c.GetDatabase(DatabaseName, null)).Returns(_mongoDatabase.Object);
         _mongoDatabase.Setup(d => d.GetCollection<CacheItem>(CollectionName, null)).Returns(_mongoCollection.Object);
+#if NET8_0_OR_GREATER
         _sut = new CacheItemRepository(_mongoClient.Object, new FakeTimeProvider(), BuildMongoCacheOptions());
+#else
+        _sut = new CacheItemRepository(_mongoClient.Object, new Mock<ISystemClock>().Object, BuildMongoCacheOptions());
+#endif
     }
 
     [Fact]
