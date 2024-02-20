@@ -6,4 +6,5 @@ public sealed class MongoCacheOptions
     public string? DatabaseName { get; set; }
     public string? CollectionName { get; set; }
     public bool AllowNoExpiration { get; set; } = true;
+    public TimeSpan? RemoveExpiredDelay { get; set; }
 }

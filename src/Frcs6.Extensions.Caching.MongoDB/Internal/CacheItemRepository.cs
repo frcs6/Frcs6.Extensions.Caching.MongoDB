@@ -7,6 +7,10 @@ internal sealed class CacheItemRepository : ICacheItemRepository
     private static readonly ReplaceOptions DefaultReplaceOptions = new() { IsUpsert = true };
     private static readonly UpdateOptions DefaultUpdateOptions = new() { IsUpsert = false };
 
+    private static readonly SemaphoreSlim _lock = new(1, 1);
+    private static DateTimeOffset? _nextRemoveExpired;
+
+    private readonly TimeSpan? _removeExpiredDelay;
     private readonly IMongoCollection<CacheItem> _cacheItemCollection;
 
 #if NET8_0_OR_GREATER
@@ -26,6 +30,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository
     {
         ValidateOptions(mongoCacheOptions.Value);
         _cacheItemCollection = GetCollection(mongoClient, mongoCacheOptions.Value);
+        _removeExpiredDelay = mongoCacheOptions.Value.RemoveExpiredDelay;
 #if NET8_0_OR_GREATER
         _timeProvider = timeProvider;
 #else
@@ -123,7 +128,32 @@ internal sealed class CacheItemRepository : ICacheItemRepository
     }
 
     public void RemoveExpired()
-        => _cacheItemCollection.DeleteMany(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks));
+    {
+#pragma warning disable IDE0039 // Use local function
+        var removeExpired = () => _cacheItemCollection.DeleteMany(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks));
+#pragma warning restore IDE0039 // Use local function
+
+        if (!_removeExpiredDelay.HasValue)
+        {
+            removeExpired();
+            return;
+        }
+
+        _lock.Wait();
+        try
+        {
+            var utcNow = _timeProvider.GetUtcNow();
+            if (!_nextRemoveExpired.HasValue || utcNow >= _nextRemoveExpired)
+            {
+                removeExpired();
+                _nextRemoveExpired = utcNow.Add(_removeExpiredDelay.Value);
+            }
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
 
     public Task RemoveExpiredAsync(CancellationToken token)
         => _cacheItemCollection.DeleteManyAsync(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks), token);
