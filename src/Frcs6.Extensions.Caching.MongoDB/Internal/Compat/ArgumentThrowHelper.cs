@@ -1,7 +1,5 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Internal.Compat;
 
-using System;
-
 [ExcludeFromCodeCoverage]
 internal static class ArgumentThrowHelper
 {
@@ -10,7 +8,10 @@ internal static class ArgumentThrowHelper
 #if NET7_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(argument, paramName);
 #else
-        if (argument is null) throw new ArgumentNullException(paramName);
+        if (argument is null)
+        {
+            throw new ArgumentNullException(paramName);
+        }
 #endif
     }
 

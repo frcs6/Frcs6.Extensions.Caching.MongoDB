@@ -155,8 +155,33 @@ internal sealed class CacheItemRepository : ICacheItemRepository
         }
     }
 
-    public Task RemoveExpiredAsync(CancellationToken token)
-        => _cacheItemCollection.DeleteManyAsync(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks), token);
+    public async Task RemoveExpiredAsync(CancellationToken token)
+    {
+#pragma warning disable IDE0039 // Use local function
+        var removeExpiredAsync = async () => await _cacheItemCollection.DeleteManyAsync(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks), token).ConfigureAwait(false);
+#pragma warning restore IDE0039 // Use local function
+
+        if (!_removeExpiredDelay.HasValue)
+        {
+            await removeExpiredAsync().ConfigureAwait(true);
+            return;
+        }
+
+        await _lock.WaitAsync(token).ConfigureAwait(true);
+        try
+        {
+            var utcNow = _timeProvider.GetUtcNow();
+            if (!_nextRemoveExpired.HasValue || utcNow >= _nextRemoveExpired)
+            {
+                await removeExpiredAsync().ConfigureAwait(true);
+                _nextRemoveExpired = utcNow.Add(_removeExpiredDelay.Value);
+            }
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
 
     private static FilterDefinition<CacheItem> FindByKey(string key)
          => Builders<CacheItem>.Filter.Eq(i => i.Key, key);
