@@ -7,7 +7,6 @@ namespace Frcs6.Extensions.Caching.MongoDB.IntegratedTests.Internal;
 public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 {
     private const string DatabaseName = "TestDatabase";
-    private const string CollectionName = "TestCollection";
 
     private readonly Fixture _fixture = new();
 
@@ -15,7 +14,8 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 
     private readonly MongoClient _mongoClient;
     private readonly IMongoCollection<CacheItem> _cacheItemCollection;
-    private readonly IOptions<MongoCacheOptions> _mongoCacheOptions;
+    private readonly string _collectionName;
+
 #if NET8_0_OR_GREATER
     private readonly FakeTimeProvider _timeProvider = new();
 #else
@@ -24,18 +24,12 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 
     public CacheItemRepositoryTest(MongoDatabaseFixture mongoDatabase)
     {
+        _collectionName = _fixture.Create<string>();
 #pragma warning disable CA1062 // Validate arguments of public methods
         _mongoClient = new MongoClient(mongoDatabase.GetConnectionString());
 #pragma warning restore CA1062 // Validate arguments of public methods
-        _cacheItemCollection = _mongoClient.GetDatabase(DatabaseName).GetCollection<CacheItem>(CollectionName);
-
+        _cacheItemCollection = _mongoClient.GetDatabase(DatabaseName).GetCollection<CacheItem>(_collectionName);
         ConfigureUtcNow(DateTimeOffset.UtcNow);
-
-        _mongoCacheOptions = Options.Create(new MongoCacheOptions
-        {
-            DatabaseName = DatabaseName,
-            CollectionName = CollectionName
-        });
     }
 
     [Fact]
@@ -102,9 +96,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
         using (new AssertionScope())
         {
             result.Value.Should().BeNull();
-            result
-                .Should()
-                .BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
+            result.Should().BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
         }
     }
 
@@ -122,9 +114,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
         using (new AssertionScope())
         {
             result.Value.Should().BeNull();
-            result
-                .Should()
-                .BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
+            result.Should().BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
         }
     }
 
@@ -242,19 +232,15 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 
         using (new AssertionScope())
         {
-            cacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-
-            expiredCacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
     [Fact]
     public void GivenRemoveExpiredDelayNotReach_WhenRemoveExpired_ThenKeepCollection()
     {
-        _mongoCacheOptions.Value.RemoveExpiredDelay = TimeSpan.FromHours(2);
-        var sut = GetSut();
+        var sut = GetSut(TimeSpan.FromHours(2));
         sut.RemoveExpired();
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
@@ -262,19 +248,15 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 
         using (new AssertionScope())
         {
-            cacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-
-            expiredCacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
         }
     }
 
     [Fact]
     public void GivenRemoveExpiredDelayReach_WhenRemoveExpired_ThenRemoveCollection()
     {
-        _mongoCacheOptions.Value.RemoveExpiredDelay = TimeSpan.FromHours(2);
-        var sut = GetSut();
+        var sut = GetSut(TimeSpan.FromHours(2));
         sut.RemoveExpired();
         ConfigureUtcNow(_utcNow.AddHours(3));
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
@@ -283,11 +265,8 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 
         using (new AssertionScope())
         {
-            cacheItems
-               .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-
-            expiredCacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
@@ -301,19 +280,15 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 
         using (new AssertionScope())
         {
-            cacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-
-            expiredCacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
     [Fact]
     public async Task GivenRemoveExpiredDelayNotReach_WhenRemoveExpiredAsync_ThenKeepCollection()
     {
-        _mongoCacheOptions.Value.RemoveExpiredDelay = TimeSpan.FromHours(2);
-        var sut = GetSut();
+        var sut = GetSut(TimeSpan.FromHours(2));
         await sut.RemoveExpiredAsync(default);
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
@@ -321,19 +296,15 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 
         using (new AssertionScope())
         {
-            cacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-
-            expiredCacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
         }
     }
 
     [Fact]
     public async Task GivenRemoveExpiredDelayReach_WhenRemoveExpiredAsync_ThenRemoveCollection()
     {
-        _mongoCacheOptions.Value.RemoveExpiredDelay = TimeSpan.FromHours(2);
-        var sut = GetSut();
+        var sut = GetSut(TimeSpan.FromHours(2));
         await sut.RemoveExpiredAsync(default);
         ConfigureUtcNow(_utcNow.AddHours(3));
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
@@ -342,11 +313,8 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 
         using (new AssertionScope())
         {
-            cacheItems
-               .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-
-            expiredCacheItems
-                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
@@ -360,20 +328,28 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 #endif
     }
 
-    private CacheItemRepository GetSut()
+    private CacheItemRepository GetSut(TimeSpan? removeExpiredDelay = null)
+    {
+        var mongoCacheOptions = Options.Create(new MongoCacheOptions
+        {
+            DatabaseName = DatabaseName,
+            CollectionName = _collectionName,
+            RemoveExpiredDelay = removeExpiredDelay
+        });
 #if NET8_0_OR_GREATER
-        => new CacheItemRepository(_mongoClient, _timeProvider, _mongoCacheOptions);
+        return  new(_mongoClient, _timeProvider, mongoCacheOptions);
 #else
-        => new CacheItemRepository(_mongoClient, _timeProvider.Object, _mongoCacheOptions);
+        return new(_mongoClient, _timeProvider.Object, mongoCacheOptions);
 #endif
+    }
 
     private (List<CacheItem>, List<CacheItem>) ArrangeCollectionWithExpiredItem()
     {
         var cacheItems = _fixture
-                    .Build<CacheItem>()
-                    .With(i => i.ExpireAt, _utcNow.AddHours(10).Ticks)
-                    .CreateMany(12)
-                    .ToList();
+            .Build<CacheItem>()
+            .With(i => i.ExpireAt, _utcNow.AddHours(10).Ticks)
+            .CreateMany(12)
+            .ToList();
         _cacheItemCollection.InsertMany(cacheItems);
 
         var expiredCacheItems = _fixture

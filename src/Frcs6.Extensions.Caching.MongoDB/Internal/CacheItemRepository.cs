@@ -158,7 +158,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository
     public async Task RemoveExpiredAsync(CancellationToken token)
     {
 #pragma warning disable IDE0039 // Use local function
-        var removeExpiredAsync = () => _cacheItemCollection.DeleteManyAsync(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks), token);
+        var removeExpiredAsync = async () => await _cacheItemCollection.DeleteManyAsync(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks), token).ConfigureAwait(false);
 #pragma warning restore IDE0039 // Use local function
 
         if (!_removeExpiredDelay.HasValue)
