@@ -236,65 +236,40 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public void GivenCacheItem_WhenRemoveExpired_ThenRemoveCollection()
     {
         var sut = GetSut();
-        var cacheItems = _fixture
-            .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(10).Ticks)
-            .CreateMany(12)
-            .ToList();
-        _cacheItemCollection.InsertMany(cacheItems);
-
-        var expiredCacheItems = _fixture
-            .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(-10).Ticks)
-            .CreateMany(12)
-            .ToList();
-        _cacheItemCollection.InsertMany(expiredCacheItems);
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         sut.RemoveExpired();
 
         using (new AssertionScope())
         {
-            foreach (var cacheItem in cacheItems)
-                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(1);
+            cacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
 
-            foreach (var cacheItem in expiredCacheItems)
-                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(0);
+            expiredCacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
-    
+
     [Fact]
     public void GivenRemoveExpiredDelayNotReach_WhenRemoveExpired_ThenKeepCollection()
     {
         _mongoCacheOptions.Value.RemoveExpiredDelay = TimeSpan.FromHours(2);
         var sut = GetSut();
         sut.RemoveExpired();
-        
-        var cacheItems = _fixture
-            .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(10).Ticks)
-            .CreateMany(12)
-            .ToList();
-        _cacheItemCollection.InsertMany(cacheItems);
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
-        var expiredCacheItems = _fixture
-            .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(-10).Ticks)
-            .CreateMany(12)
-            .ToList();
-        _cacheItemCollection.InsertMany(expiredCacheItems);
-        
         sut.RemoveExpired();
 
         using (new AssertionScope())
         {
-            foreach (var cacheItem in cacheItems)
-                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(1);
+            cacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
 
-            foreach (var cacheItem in expiredCacheItems)
-                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(1);
+            expiredCacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
         }
     }
-    
+
     [Fact]
     public void GivenRemoveExpiredDelayReach_WhenRemoveExpired_ThenRemoveCollection()
     {
@@ -302,30 +277,17 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
         var sut = GetSut();
         sut.RemoveExpired();
         ConfigureUtcNow(_utcNow.AddHours(3));
-        
-        var cacheItems = _fixture
-            .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(10).Ticks)
-            .CreateMany(12)
-            .ToList();
-        _cacheItemCollection.InsertMany(cacheItems);
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
-        var expiredCacheItems = _fixture
-            .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(-10).Ticks)
-            .CreateMany(12)
-            .ToList();
-        _cacheItemCollection.InsertMany(expiredCacheItems);
-        
         sut.RemoveExpired();
 
         using (new AssertionScope())
         {
-            foreach (var cacheItem in cacheItems)
-                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(1);
+            cacheItems
+               .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
 
-            foreach (var cacheItem in expiredCacheItems)
-                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(0);
+            expiredCacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
@@ -333,29 +295,58 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public async Task GivenCacheItem_WhenRemoveExpiredAsync_ThenRemoveCollection()
     {
         var sut = GetSut();
-        var cacheItems = _fixture
-            .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(10).Ticks)
-            .CreateMany(12)
-            .ToList();
-        await _cacheItemCollection.InsertManyAsync(cacheItems);
-
-        var expiredCacheItems = _fixture
-            .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(-10).Ticks)
-            .CreateMany(12)
-            .ToList();
-        await _cacheItemCollection.InsertManyAsync(expiredCacheItems);
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         await sut.RemoveExpiredAsync(default);
 
         using (new AssertionScope())
         {
-            foreach (var cacheItem in cacheItems)
-                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(1);
+            cacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
 
-            foreach (var cacheItem in expiredCacheItems)
-                _cacheItemCollection.CountDocuments(i => i.Key == cacheItem.Key, default).Should().Be(0);
+            expiredCacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+        }
+    }
+
+    [Fact]
+    public async Task GivenRemoveExpiredDelayNotReach_WhenRemoveExpiredAsync_ThenKeepCollection()
+    {
+        _mongoCacheOptions.Value.RemoveExpiredDelay = TimeSpan.FromHours(2);
+        var sut = GetSut();
+        sut.RemoveExpired();
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+
+        await sut.RemoveExpiredAsync(default);
+
+        using (new AssertionScope())
+        {
+            cacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+
+            expiredCacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+        }
+    }
+
+    [Fact]
+    public async Task GivenRemoveExpiredDelayReach_WhenRemoveExpiredAsync_ThenRemoveCollection()
+    {
+        _mongoCacheOptions.Value.RemoveExpiredDelay = TimeSpan.FromHours(2);
+        var sut = GetSut();
+        sut.RemoveExpired();
+        ConfigureUtcNow(_utcNow.AddHours(3));
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+
+        await sut.RemoveExpiredAsync(default);
+
+        using (new AssertionScope())
+        {
+            cacheItems
+               .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+
+            expiredCacheItems
+                .ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
@@ -375,4 +366,23 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
 #else
         => new CacheItemRepository(_mongoClient, _timeProvider.Object, _mongoCacheOptions);
 #endif
+
+    private (List<CacheItem>, List<CacheItem>) ArrangeCollectionWithExpiredItem()
+    {
+        var cacheItems = _fixture
+                    .Build<CacheItem>()
+                    .With(i => i.ExpireAt, _utcNow.AddHours(10).Ticks)
+                    .CreateMany(12)
+                    .ToList();
+        _cacheItemCollection.InsertMany(cacheItems);
+
+        var expiredCacheItems = _fixture
+            .Build<CacheItem>()
+            .With(i => i.ExpireAt, _utcNow.AddHours(-10).Ticks)
+            .CreateMany(12)
+            .ToList();
+        _cacheItemCollection.InsertMany(expiredCacheItems);
+
+        return (cacheItems, expiredCacheItems);
+    }
 }
