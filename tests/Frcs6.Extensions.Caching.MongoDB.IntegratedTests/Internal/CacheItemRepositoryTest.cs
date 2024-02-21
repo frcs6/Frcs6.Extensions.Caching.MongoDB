@@ -314,7 +314,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     {
         _mongoCacheOptions.Value.RemoveExpiredDelay = TimeSpan.FromHours(2);
         var sut = GetSut();
-        sut.RemoveExpired();
+        await sut.RemoveExpiredAsync(default);
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         await sut.RemoveExpiredAsync(default);
@@ -334,7 +334,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     {
         _mongoCacheOptions.Value.RemoveExpiredDelay = TimeSpan.FromHours(2);
         var sut = GetSut();
-        sut.RemoveExpired();
+        await sut.RemoveExpiredAsync(default);
         ConfigureUtcNow(_utcNow.AddHours(3));
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
