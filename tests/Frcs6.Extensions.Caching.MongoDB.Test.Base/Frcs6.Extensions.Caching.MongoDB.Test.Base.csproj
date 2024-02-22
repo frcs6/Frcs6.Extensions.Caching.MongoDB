@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsTestProject>false</IsTestProject>    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoFixture" />
+    <PackageReference Include="AutoFixture.AutoMoq" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" />
+  </ItemGroup>  
+  
+  <ItemGroup Condition = "'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Frcs6.Extensions.Caching.MongoDB\Frcs6.Extensions.Caching.MongoDB.csproj" />
+  </ItemGroup>  
+
+</Project>

@@ -1,28 +1,12 @@
-using Microsoft.Extensions.Options;
-
 namespace Frcs6.Extensions.Caching.MongoDB.Tests.Internal;
 
 public class CacheItemBuilderTest : BaseTest
 {
-    private DateTimeOffset _utcNow;
-    private IOptions<MongoCacheOptions> _mongoCacheOptions;
-
-#if NET8_0_OR_GREATER
-    private readonly FakeTimeProvider _timeProvider = new();
-#else
-    private readonly Mock<ISystemClock> _timeProvider = new();
-#endif
     private readonly CacheItemBuilder _sut;
 
     public CacheItemBuilderTest()
     {
-        ConfigureUtcNow(DateTimeOffset.UtcNow);
-        _mongoCacheOptions = BuildMongoCacheOptions();
-#if NET8_0_OR_GREATER
-        _sut = new CacheItemBuilder(_timeProvider, _mongoCacheOptions);
-#else
-        _sut = new CacheItemBuilder(_timeProvider.Object, _mongoCacheOptions);
-#endif
+        _sut = Fixture.Create<CacheItemBuilder>();
     }
 
     [Theory]
@@ -47,7 +31,7 @@ public class CacheItemBuilderTest : BaseTest
     public void GivenInvalidAbsoluteExpiration_WhenBuild_ThrowArgumentOutOfRangeException()
     {
         var options = new DistributedCacheEntryOptions()
-            .SetAbsoluteExpiration(_utcNow.AddHours(-1));
+            .SetAbsoluteExpiration(UtcNow.AddHours(-1));
 
         var act = () => _sut.Build(DefaultKey, DefaultValue, options);
 
@@ -59,14 +43,14 @@ public class CacheItemBuilderTest : BaseTest
     {
         var expiration = TimeSpan.FromHours(1);
         var options = new DistributedCacheEntryOptions()
-            .SetAbsoluteExpiration(_utcNow.Add(expiration));
+            .SetAbsoluteExpiration(UtcNow.Add(expiration));
 
         var expected = new CacheItem
         {
             Key = DefaultKey,
             Value = DefaultValue,
             AbsoluteExpiration = options.AbsoluteExpiration!.Value.Ticks,
-            ExpireAt = (_utcNow + expiration).Ticks
+            ExpireAt = (UtcNow + expiration).Ticks
         };
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
@@ -93,7 +77,7 @@ public class CacheItemBuilderTest : BaseTest
     [Fact]
     public void GivenNoExpirationNotAllow_WhenBuild_ThrowInvalidOperationException()
     {
-        _mongoCacheOptions.Value.AllowNoExpiration = false;
+        MongoCacheOptions.AllowNoExpiration = false;
         var options = new DistributedCacheEntryOptions();
         var act = () => _sut.Build(DefaultKey, DefaultValue, options);
         act.Should().Throw<InvalidOperationException>().WithMessage("Cache without expiration is not allowed");
@@ -110,8 +94,8 @@ public class CacheItemBuilderTest : BaseTest
         {
             Key = DefaultKey,
             Value = DefaultValue,
-            AbsoluteExpiration = (_utcNow + options.AbsoluteExpirationRelativeToNow!.Value).Ticks,
-            ExpireAt = (_utcNow + expiration).Ticks
+            AbsoluteExpiration = (UtcNow + options.AbsoluteExpirationRelativeToNow!.Value).Ticks,
+            ExpireAt = (UtcNow + expiration).Ticks
         };
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
@@ -131,7 +115,7 @@ public class CacheItemBuilderTest : BaseTest
             Key = DefaultKey,
             Value = DefaultValue,
             SlidingExpiration = options.SlidingExpiration!.Value.Ticks,
-            ExpireAt = (_utcNow + expiration).Ticks
+            ExpireAt = (UtcNow + expiration).Ticks
         };
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
@@ -152,9 +136,9 @@ public class CacheItemBuilderTest : BaseTest
         {
             Key = DefaultKey,
             Value = DefaultValue,
-            AbsoluteExpiration = (_utcNow + options.AbsoluteExpirationRelativeToNow!.Value).Ticks,
+            AbsoluteExpiration = (UtcNow + options.AbsoluteExpirationRelativeToNow!.Value).Ticks,
             SlidingExpiration = options.SlidingExpiration!.Value.Ticks,
-            ExpireAt = (_utcNow + expiration1).Ticks
+            ExpireAt = (UtcNow + expiration1).Ticks
         };
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
@@ -175,9 +159,9 @@ public class CacheItemBuilderTest : BaseTest
         {
             Key = DefaultKey,
             Value = DefaultValue,
-            AbsoluteExpiration = (_utcNow + options.AbsoluteExpirationRelativeToNow!.Value).Ticks,
+            AbsoluteExpiration = (UtcNow + options.AbsoluteExpirationRelativeToNow!.Value).Ticks,
             SlidingExpiration = options.SlidingExpiration!.Value.Ticks,
-            ExpireAt = (_utcNow + expiration2).Ticks
+            ExpireAt = (UtcNow + expiration2).Ticks
         };
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
@@ -213,7 +197,7 @@ public class CacheItemBuilderTest : BaseTest
         var slidingExpiration = TimeSpan.FromMinutes(10);
         var expected = new CacheItem()
             .SetSlidingExpiration(slidingExpiration)
-            .SetExpireAt(_utcNow + slidingExpiration);
+            .SetExpireAt(UtcNow + slidingExpiration);
 
         var cacheItem = new CacheItem().SetSlidingExpiration(slidingExpiration);
 
@@ -230,7 +214,7 @@ public class CacheItemBuilderTest : BaseTest
     public void GivenSlidingExpirationLessThenAbsoluteExpiration_WhenRefresh_ThenUpdateAndReturnTrue()
     {
         var slidingExpiration = TimeSpan.FromMinutes(10);
-        var absoluteExpiration = _utcNow.AddMinutes(5);
+        var absoluteExpiration = UtcNow.AddMinutes(5);
         var expected = new CacheItem()
             .SetSlidingExpiration(slidingExpiration)
             .SetAbsoluteExpiration(absoluteExpiration)
@@ -253,11 +237,11 @@ public class CacheItemBuilderTest : BaseTest
     public void GivenAbsoluteExpirationLessThenSlidingExpiration_WhenRefresh_ThenUpdateAndReturnTrue()
     {
         var slidingExpiration = TimeSpan.FromMinutes(10);
-        var absoluteExpiration = _utcNow.AddMinutes(20);
+        var absoluteExpiration = UtcNow.AddMinutes(20);
         var expected = new CacheItem()
             .SetSlidingExpiration(slidingExpiration)
             .SetAbsoluteExpiration(absoluteExpiration)
-            .SetExpireAt(_utcNow + slidingExpiration);
+            .SetExpireAt(UtcNow + slidingExpiration);
 
         var cacheItem = new CacheItem()
             .SetSlidingExpiration(slidingExpiration)
@@ -270,15 +254,5 @@ public class CacheItemBuilderTest : BaseTest
             cacheItem.Should().BeEquivalentTo(expected);
             result.Should().BeTrue();
         }
-    }
-
-    private void ConfigureUtcNow(DateTimeOffset utcNow)
-    {
-        _utcNow = utcNow;
-#if NET8_0_OR_GREATER
-        _timeProvider.SetUtcNow(utcNow);
-#else
-        _timeProvider.SetupGet(p => p.UtcNow).Returns(utcNow);
-#endif
     }
 }

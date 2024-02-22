@@ -1,6 +1,6 @@
 using Testcontainers.MongoDb;
 
-namespace Frcs6.Extensions.Caching.MongoDB.Tests.Common;
+namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated.Common;
 
 public sealed class MongoDatabaseFixture : IDisposable
 {

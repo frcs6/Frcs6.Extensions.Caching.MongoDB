@@ -2,20 +2,17 @@
 
 public class CacheItemRepositoryTest : BaseTest
 {
-    private readonly Mock<IMongoClient> _mongoClient = new();
+    private readonly Mock<IMongoClient> _mongoClient;
     private readonly Mock<IMongoDatabase> _mongoDatabase = new();
     private readonly Mock<IMongoCollection<CacheItem>> _mongoCollection = new();
     private readonly CacheItemRepository _sut;
 
     public CacheItemRepositoryTest()
     {
+        _mongoClient = Fixture.Freeze<Mock<IMongoClient>>();
         _mongoClient.Setup(c => c.GetDatabase(DatabaseName, null)).Returns(_mongoDatabase.Object);
         _mongoDatabase.Setup(d => d.GetCollection<CacheItem>(CollectionName, null)).Returns(_mongoCollection.Object);
-#if NET8_0_OR_GREATER
-        _sut = new CacheItemRepository(_mongoClient.Object, new FakeTimeProvider(), BuildMongoCacheOptions());
-#else
-        _sut = new CacheItemRepository(_mongoClient.Object, new Mock<ISystemClock>().Object, BuildMongoCacheOptions());
-#endif
+        _sut = Fixture.Create<CacheItemRepository>();
     }
 
     [Fact]

@@ -54,7 +54,7 @@ internal sealed class MongoCache : IDistributedCache
     public async Task RemoveAsync(string key, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(key);
-        CleanExpired();
+        await CleanExpiredAsync(token).ConfigureAwait(false);
         await _cacheItemRepository.RemoveAsync(key, token).ConfigureAwait(false);
     }
 
@@ -75,7 +75,7 @@ internal sealed class MongoCache : IDistributedCache
         ArgumentNullException.ThrowIfNull(value);
         ArgumentNullException.ThrowIfNull(options);
 
-        CleanExpired();
+        await CleanExpiredAsync(token).ConfigureAwait(false);
         var cacheItem = _cacheItemBuilder.Build(key, value, options);
         await _cacheItemRepository.WriteAsync(cacheItem, token).ConfigureAwait(false);
     }
@@ -121,12 +121,8 @@ internal sealed class MongoCache : IDistributedCache
     }
 
     private void CleanExpired()
-    {
-        _cacheItemRepository.RemoveExpired();
-    }
+        => _cacheItemRepository.RemoveExpired();
 
     private async Task CleanExpiredAsync(CancellationToken token)
-    {
-        await _cacheItemRepository.RemoveExpiredAsync(token).ConfigureAwait(false);
-    }
+        => await _cacheItemRepository.RemoveExpiredAsync(token).ConfigureAwait(false);
 }

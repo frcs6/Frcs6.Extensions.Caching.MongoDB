@@ -1,41 +1,27 @@
-using FluentAssertions.Execution;
-using Frcs6.Extensions.Caching.MongoDB.Tests.Common;
 using Microsoft.Extensions.Options;
 
-namespace Frcs6.Extensions.Caching.MongoDB.IntegratedTests.Internal;
+namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated.Internal;
 
-public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
+public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseFixture>
 {
-    private const string DatabaseName = "TestDatabase";
-    private const string CollectionName = "TestCollection";
-
-    private readonly Fixture _fixture = new();
-
-    private DateTimeOffset _utcNow;
-
     private readonly MongoClient _mongoClient;
     private readonly IMongoCollection<CacheItem> _cacheItemCollection;
-
-#if NET8_0_OR_GREATER
-    private readonly FakeTimeProvider _timeProvider = new();
-#else
-    private readonly Mock<ISystemClock> _timeProvider = new();
-#endif
 
     public CacheItemRepositoryTest(MongoDatabaseFixture mongoDatabase)
     {
 #pragma warning disable CA1062 // Validate arguments of public methods
         _mongoClient = new MongoClient(mongoDatabase.GetConnectionString());
 #pragma warning restore CA1062 // Validate arguments of public methods
+        Fixture.Register<IMongoClient>(() => _mongoClient);
+        Fixture.Register(() => new SharedContext(Options.Create(MongoCacheOptions)));
         _cacheItemCollection = _mongoClient.GetDatabase(DatabaseName).GetCollection<CacheItem>(CollectionName);
-        ConfigureUtcNow(DateTimeOffset.UtcNow);
     }
 
     [Fact]
     public void GivenCacheItem_WhenRead_ThenReadCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
         var result = sut.Read(cacheItem.Key!);
         result.Should().BeNull();
 
@@ -48,7 +34,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public async Task GivenCacheItem_WhenReadAsync_ThenReadCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
         var result = await sut.ReadAsync(cacheItem.Key!, default);
         result.Should().BeNull();
 
@@ -61,7 +47,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public void GivenCacheItem_WhenWrite_ThenWriteCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
 
         sut.Write(cacheItem);
 
@@ -73,7 +59,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public async Task GivenCacheItem_WhenWriteSync_ThenWriteCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
 
         await sut.WriteAsync(cacheItem, default);
 
@@ -85,7 +71,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public void GivenCacheItem_WhenReadPartial_ThenReadCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
         var result = sut.ReadPartial(cacheItem.Key!);
         result.Should().BeNull();
 
@@ -103,7 +89,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public async Task GivenCacheItem_WhenReadPartialAsync_ThenReadCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
         var result = await sut.ReadPartialAsync(cacheItem.Key!, default);
         result.Should().BeNull();
 
@@ -121,9 +107,9 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public void GivenCacheItem_WhenWritePartial_ThenWriteCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
         _cacheItemCollection.InsertOne(cacheItem);
-        var newCacheItem = _fixture
+        var newCacheItem = Fixture
             .Build<CacheItem>()
             .With(i => i.Key, cacheItem.Key)
             .Without(i => i.Value)
@@ -148,9 +134,9 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public async Task GivenCacheItem_WhenWritePartialAsync_ThenWriteCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
         await _cacheItemCollection.InsertOneAsync(cacheItem);
-        var newCacheItem = _fixture
+        var newCacheItem = Fixture
             .Build<CacheItem>()
             .With(i => i.Key, cacheItem.Key)
             .Without(i => i.Value)
@@ -175,7 +161,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public void GivenCacheItemDeleted_WhenWritePartial_ThenNoWriteCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
 
         sut.WritePartial(cacheItem);
 
@@ -187,7 +173,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public async Task GivenCacheItemDeleted_WhenWritePartialSync_ThenNoWriteCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
 
         await sut.WritePartialAsync(cacheItem, default);
 
@@ -199,7 +185,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public void GivenCacheItem_WhenRemove_ThenRemoveCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
         _cacheItemCollection.InsertOne(cacheItem);
 
         sut.Remove(cacheItem.Key!);
@@ -212,7 +198,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     public async Task GivenCacheItem_WhenRemoveAsync_ThenRemoveCollection()
     {
         var sut = GetSut();
-        var cacheItem = _fixture.Create<CacheItem>();
+        var cacheItem = Fixture.Create<CacheItem>();
         await _cacheItemCollection.InsertOneAsync(cacheItem);
 
         await sut.RemoveAsync(cacheItem.Key!, default);
@@ -257,7 +243,7 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
     {
         var sut = GetSut(TimeSpan.FromHours(2));
         sut.RemoveExpired();
-        ConfigureUtcNow(_utcNow.AddHours(3));
+        ConfigureUtcNow(UtcNow.AddHours(3));
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         sut.RemoveExpired();
@@ -269,92 +255,72 @@ public class CacheItemRepositoryTest : IClassFixture<MongoDatabaseFixture>
         }
     }
 
-    // TODO Failed because the variable is static
-    // [Fact]
-    // public async Task GivenCacheItem_WhenRemoveExpiredAsync_ThenRemoveCollection()
-    // {
-    //     var sut = GetSut();
-    //     (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
-
-    //     await sut.RemoveExpiredAsync(default);
-
-    //     using (new AssertionScope())
-    //     {
-    //         cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-    //         expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
-    //     }
-    // }
-
-    // [Fact]
-    // public async Task GivenRemoveExpiredDelayNotReach_WhenRemoveExpiredAsync_ThenKeepCollection()
-    // {
-    //     var sut = GetSut(TimeSpan.FromHours(2));
-    //     await sut.RemoveExpiredAsync(default);
-    //     (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
-
-    //     await sut.RemoveExpiredAsync(default);
-
-    //     using (new AssertionScope())
-    //     {
-    //         cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-    //         expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-    //     }
-    // }
-
-    // [Fact]
-    // public async Task GivenRemoveExpiredDelayReach_WhenRemoveExpiredAsync_ThenRemoveCollection()
-    // {
-    //     var sut = GetSut(TimeSpan.FromHours(2));
-    //     await sut.RemoveExpiredAsync(default);
-    //     ConfigureUtcNow(_utcNow.AddHours(3));
-    //     (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
-
-    //     await sut.RemoveExpiredAsync(default);
-
-    //     using (new AssertionScope())
-    //     {
-    //         cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-    //         expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
-    //     }
-    // }
-
-    private void ConfigureUtcNow(DateTimeOffset utcNow)
+    [Fact]
+    public async Task GivenCacheItem_WhenRemoveExpiredAsync_ThenRemoveCollection()
     {
-        _utcNow = utcNow;
-#if NET8_0_OR_GREATER
-        _timeProvider.SetUtcNow(utcNow);
-#else
-        _timeProvider.SetupGet(p => p.UtcNow).Returns(utcNow);
-#endif
+        var sut = GetSut();
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+
+        await sut.RemoveExpiredAsync(default);
+
+        using (new AssertionScope())
+        {
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+        }
+    }
+
+    [Fact]
+    public async Task GivenRemoveExpiredDelayNotReach_WhenRemoveExpiredAsync_ThenKeepCollection()
+    {
+        var sut = GetSut(TimeSpan.FromHours(2));
+        await sut.RemoveExpiredAsync(default);
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+
+        await sut.RemoveExpiredAsync(default);
+
+        using (new AssertionScope())
+        {
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+        }
+    }
+
+    [Fact]
+    public async Task GivenRemoveExpiredDelayReach_WhenRemoveExpiredAsync_ThenRemoveCollection()
+    {
+        var sut = GetSut(TimeSpan.FromHours(2));
+        await sut.RemoveExpiredAsync(default);
+        ConfigureUtcNow(UtcNow.AddHours(3));
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+
+        await sut.RemoveExpiredAsync(default);
+
+        using (new AssertionScope())
+        {
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+        }
     }
 
     private CacheItemRepository GetSut(TimeSpan? removeExpiredDelay = null)
     {
-        var mongoCacheOptions = Options.Create(new MongoCacheOptions
-        {
-            DatabaseName = DatabaseName,
-            CollectionName = CollectionName,
-            RemoveExpiredDelay = removeExpiredDelay
-        });
-#if NET8_0_OR_GREATER
-        return  new(_mongoClient, _timeProvider, mongoCacheOptions);
-#else
-        return new(_mongoClient, _timeProvider.Object, mongoCacheOptions);
-#endif
+        MongoCacheOptions.RemoveExpiredDelay = removeExpiredDelay;
+        return Fixture.Create<CacheItemRepository>();
     }
 
     private (List<CacheItem>, List<CacheItem>) ArrangeCollectionWithExpiredItem()
     {
-        var cacheItems = _fixture
+        var cacheItems = Fixture
             .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(10).Ticks)
+            .With(i => i.ExpireAt, UtcNow.AddHours(10).Ticks)
             .CreateMany(12)
             .ToList();
         _cacheItemCollection.InsertMany(cacheItems);
 
-        var expiredCacheItems = _fixture
+        var expiredCacheItems = Fixture
             .Build<CacheItem>()
-            .With(i => i.ExpireAt, _utcNow.AddHours(-10).Ticks)
+            .With(i => i.ExpireAt, UtcNow.AddHours(-10).Ticks)
             .CreateMany(12)
             .ToList();
         _cacheItemCollection.InsertMany(expiredCacheItems);
