@@ -9,7 +9,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
     <InternalsVisibleTo Include="Frcs6.Extensions.Caching.MongoDB.Test.Integrated" />
-    <InternalsVisibleTo Include="Frcs6.Extensions.Caching.MongoDB.Tests" />
+    <InternalsVisibleTo Include="Frcs6.Extensions.Caching.MongoDB.Test.Unit" />
   </ItemGroup>
 
 </Project>
