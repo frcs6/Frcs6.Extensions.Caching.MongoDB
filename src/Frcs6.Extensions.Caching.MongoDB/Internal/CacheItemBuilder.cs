@@ -1,6 +1,3 @@
-
-using Microsoft.Extensions.Options;
-
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
 #if NET8_0_OR_GREATER

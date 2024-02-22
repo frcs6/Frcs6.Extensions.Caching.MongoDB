@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="MongoDB.Driver" />
@@ -11,7 +8,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
-    <InternalsVisibleTo Include="Frcs6.Extensions.Caching.MongoDB.IntegratedTests" />
+    <InternalsVisibleTo Include="Frcs6.Extensions.Caching.MongoDB.Test.Integrated" />
     <InternalsVisibleTo Include="Frcs6.Extensions.Caching.MongoDB.Tests" />
   </ItemGroup>
 

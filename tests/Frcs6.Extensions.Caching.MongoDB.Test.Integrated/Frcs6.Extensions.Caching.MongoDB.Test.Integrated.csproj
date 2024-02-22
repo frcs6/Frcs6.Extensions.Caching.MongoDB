@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Testcontainers.MongoDb"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Frcs6.Extensions.Caching.MongoDB.Test.Base\Frcs6.Extensions.Caching.MongoDB.Test.Base.csproj" />
   </ItemGroup>   
 
