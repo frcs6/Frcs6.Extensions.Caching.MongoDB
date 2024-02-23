@@ -1,0 +1,6 @@
+{
+  "stryker-config": {
+    "solution": "./Frcs6.Extensions.Caching.MongoDB.sln",
+    "project": "Frcs6.Extensions.Caching.MongoDB.csproj"
+  }
+}
