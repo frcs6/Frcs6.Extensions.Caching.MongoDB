@@ -5,6 +5,7 @@ public class CacheItemRepositoryTest : BaseTest
     private readonly Mock<IMongoClient> _mongoClient;
     private readonly Mock<IMongoDatabase> _mongoDatabase = new();
     private readonly Mock<IMongoCollection<CacheItem>> _mongoCollection = new();
+    private readonly Mock<IMongoIndexManager<CacheItem>> _mongoIndexManager = new();
     private readonly CacheItemRepository _sut;
 
     public CacheItemRepositoryTest()
@@ -12,7 +13,14 @@ public class CacheItemRepositoryTest : BaseTest
         _mongoClient = Fixture.Freeze<Mock<IMongoClient>>();
         _mongoClient.Setup(c => c.GetDatabase(DatabaseName, null)).Returns(_mongoDatabase.Object);
         _mongoDatabase.Setup(d => d.GetCollection<CacheItem>(CollectionName, null)).Returns(_mongoCollection.Object);
+        _mongoCollection.Setup(c => c.Indexes).Returns(_mongoIndexManager.Object);
         _sut = Fixture.Create<CacheItemRepository>();
+    }
+
+    [Fact]
+    public void Given_WhenCtor_ThenAddTwoIndex()
+    {
+        _mongoIndexManager.Verify(m => m.CreateOne(It.IsAny<CreateIndexModel<CacheItem>>(), null, default), Times.Exactly(2));
     }
 
     [Fact]
