@@ -1,4 +1,5 @@
-﻿using AutoFixture;
+﻿using System.Diagnostics.CodeAnalysis;
+using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.Extensions.Options;
 
@@ -11,6 +12,7 @@ using Moq;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Base;
 
+[ExcludeFromCodeCoverage]
 public abstract class BaseTest
 {
     protected const string DatabaseName = "TestDatabase";
