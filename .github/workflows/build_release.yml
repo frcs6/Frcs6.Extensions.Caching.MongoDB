@@ -36,5 +36,4 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
-        files: ./codecov.yml
-        name: dotnet-${{ matrix.dotnet-version }}
+        flags: dotnet-${{ matrix.dotnet-version }}
