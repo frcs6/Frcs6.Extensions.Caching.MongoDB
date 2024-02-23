@@ -29,10 +29,12 @@ jobs:
       run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release -f net${{ matrix.dotnet-version }} --no-restore
 
     - name: Test solution
-      run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release -f net${{ matrix.dotnet-version }} --no-build
+      run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release -f net${{ matrix.dotnet-version }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./codecov.yml
 
-    - name: Upload coverage reports to Codecov
+    - name: Codecov
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
+        files: ./codecov.yml
+        name: dotnet-${{ matrix.dotnet-version }}
