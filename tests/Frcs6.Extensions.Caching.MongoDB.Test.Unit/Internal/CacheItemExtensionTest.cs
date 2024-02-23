@@ -1,4 +1,4 @@
-namespace Frcs6.Extensions.Caching.MongoDB.Tests.Internal;
+namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit.Internal;
 
 public class CacheItemExtensionTest
 {

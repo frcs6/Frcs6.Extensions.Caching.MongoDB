@@ -16,7 +16,7 @@
             "type": "process",
             "args": [
                 "test",
-                "tests/Frcs6.Extensions.Caching.MongoDB.Tests",
+                "tests/Frcs6.Extensions.Caching.MongoDB.Test.Unit",
                 "/p:CollectCoverage=true",
                 "/p:CoverletOutputFormat=lcov",
                 "/p:CoverletOutput=${workspaceFolder}/TestResult/lcov.info"
