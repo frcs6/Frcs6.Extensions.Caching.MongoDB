@@ -28,6 +28,8 @@ internal sealed class CacheItemRepository : ICacheItemRepository
         _cacheItemCollection = GetCollection(mongoClient, mongoCacheOptions.Value);
         _timeProvider = timeProvider;
         _sharedContext = sharedContext;
+
+        InitializeIndex();
     }
 
     public CacheItem Read(string key)
@@ -168,6 +170,31 @@ internal sealed class CacheItemRepository : ICacheItemRepository
                     await removeExpiredAsync();
                     _sharedContext.NextRemoveExpired = utcNow.Add(_sharedContext.RemoveExpiredDelay.Value);
                 }
+            }
+        }
+        finally
+        {
+            _sharedContext.LockNextRemoveExpired.Release();
+        }
+    }
+
+
+    private void InitializeIndex()
+    {
+        _sharedContext.LockNextRemoveExpired.Wait();
+        try
+        {
+            if (!_sharedContext.IndexCreated)
+            {
+                var notificationLogBuilder = Builders<CacheItem>.IndexKeys;
+
+                var indexModelByKey = new CreateIndexModel<CacheItem>(notificationLogBuilder.Ascending(x => x.Key));
+                _cacheItemCollection.Indexes.CreateOne(indexModelByKey);
+
+                var indexModelExpireAt = new CreateIndexModel<CacheItem>(notificationLogBuilder.Ascending(x => x.ExpireAt));
+                _cacheItemCollection.Indexes.CreateOne(indexModelExpireAt);
+
+                _sharedContext.IndexCreated = true;
             }
         }
         finally

@@ -8,6 +8,9 @@ internal sealed class SharedContext
 {
     public SemaphoreSlim LockNextRemoveExpired { get; } = new(1, 1);
     public DateTimeOffset? NextRemoveExpired { get; set; }
+
+    public SemaphoreSlim LockIndexCreated { get; } = new(1, 1);
+    public bool IndexCreated { get; set; }
 #if NET8_0_OR_GREATER
     public TimeSpan? RemoveExpiredDelay { get; } = mongoCacheOptions.Value.RemoveExpiredDelay;
 #else
