@@ -15,10 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frcs6.Extensions.Caching.Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frcs6.Extensions.Caching.MongoDB.Test.Integrated", "tests\Frcs6.Extensions.Caching.MongoDB.Test.Integrated\Frcs6.Extensions.Caching.MongoDB.Test.Integrated.csproj", "{9E4443A2-8741-48E0-8FC8-6C3084CEFE5A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{DB7D05BC-9661-4548-BC1C-6079FE25FD13}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "examples\ConsoleApp\ConsoleApp.csproj", "{C3A9283C-FAA0-485C-A812-C920C9F3646C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,16 +40,11 @@ Global
 		{9E4443A2-8741-48E0-8FC8-6C3084CEFE5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E4443A2-8741-48E0-8FC8-6C3084CEFE5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E4443A2-8741-48E0-8FC8-6C3084CEFE5A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C3A9283C-FAA0-485C-A812-C920C9F3646C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3A9283C-FAA0-485C-A812-C920C9F3646C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3A9283C-FAA0-485C-A812-C920C9F3646C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3A9283C-FAA0-485C-A812-C920C9F3646C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{CB705FEA-F148-4E4A-A05E-4A816E026B21} = {8E4F078C-64FF-4B0F-B2EC-06F814812DB4}
 		{B48344CC-E767-4FB5-9162-C193D1A77023} = {3B25B6A7-4507-43EB-A2F6-70073F3E4880}
 		{1979A3FD-E8FD-4E39-9367-331556F4E0D8} = {3B25B6A7-4507-43EB-A2F6-70073F3E4880}
 		{9E4443A2-8741-48E0-8FC8-6C3084CEFE5A} = {3B25B6A7-4507-43EB-A2F6-70073F3E4880}
-		{C3A9283C-FAA0-485C-A812-C920C9F3646C} = {DB7D05BC-9661-4548-BC1C-6079FE25FD13}
 	EndGlobalSection
 EndGlobal
