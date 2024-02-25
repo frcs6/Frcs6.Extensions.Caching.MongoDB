@@ -35,7 +35,7 @@ jobs:
       run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net8.0
 
     - name: Package NuGet
-      run: dotnet pack -c Release ./src/Frcs6.Extensions.Caching.MongoDB.csproj --no-build --output ./artifact
+      run: dotnet pack ./src/Frcs6.Extensions.Caching.MongoDB/Frcs6.Extensions.Caching.MongoDB.csproj -c Release --no-build -o ./artifact
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4.1.0
