@@ -34,9 +34,17 @@ jobs:
     - name: Build examples
       run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net8.0
 
+    - name: Package NuGet
+      run: dotnet pack -c Release ./src/Frcs6.Extensions.Caching.MongoDB.csproj --no-build --output ./artifact
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4.1.0
+      with:
+        name: Frcs6.Extensions.Caching.MongoDB
+        path: artifact
+
     - name: Codecov
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
-
