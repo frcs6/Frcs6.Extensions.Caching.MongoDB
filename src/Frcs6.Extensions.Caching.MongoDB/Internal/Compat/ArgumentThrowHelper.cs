@@ -3,24 +3,12 @@ namespace Frcs6.Extensions.Caching.MongoDB.Internal.Compat;
 [ExcludeFromCodeCoverage]
 internal static class ArgumentThrowHelper
 {
-    public static void ThrowIfNull(object? argument, string? paramName = null)
-    {
-#if NET7_0_OR_GREATER
-        ArgumentNullException.ThrowIfNull(argument, paramName);
-#else
-        if (argument is null)
-        {
-            throw new ArgumentNullException(paramName);
-        }
-#endif
-    }
-
     public static void ThrowIfNullOrWhiteSpace(string? argument, string? paramName = null)
     {
 #if NET8_0_OR_GREATER
         ArgumentException.ThrowIfNullOrWhiteSpace(argument, paramName);
 #else
-        ThrowIfNull(argument);
+        ArgumentNullException.ThrowIfNull(argument);
         if (string.IsNullOrWhiteSpace(argument))
         {
             throw new ArgumentException("The value cannot be an empty or whitespace string.", paramName);

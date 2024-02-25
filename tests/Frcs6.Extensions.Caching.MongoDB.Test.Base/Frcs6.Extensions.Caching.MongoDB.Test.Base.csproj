@@ -10,6 +10,7 @@
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Moq" />
     <PackageReference Include="System.ComponentModel.TypeConverter" />
+    <PackageReference Include="Testcontainers.MongoDb"/>
   </ItemGroup>  
   
   <ItemGroup Condition = "'$(TargetFramework)' == 'net8.0'">
