@@ -9,9 +9,6 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dotnet-version: ['6.0', '7.0', '8.0']
  
     steps:
     - name: Checkout
@@ -20,20 +17,26 @@ jobs:
     - name: Setup DotNet
       uses: actions/setup-dotnet@v4.0.0
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}.x
+        dotnet-version: |
+          6.0.x
+          7.0.x
+          8.0.x
 
     - name: Restore solution
       run: dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
 
     - name: Build solution
-      run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release -f net${{ matrix.dotnet-version }} --no-restore
+      run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release --no-restore
 
     - name: Test solution
-      run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release -f net${{ matrix.dotnet-version }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./codecov.yml
+      run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./codecov.yml
 
     - name: Codecov
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
-        flags: dotnet-${{ matrix.dotnet-version }}
+
+    - name: Build examples
+      run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net8.0
+
