@@ -2,7 +2,7 @@ name: 'Build and Release'
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: [ 'main', 'develop' ]
     tags: [ '*' ]
     paths-ignore: [ '**.md' ]
 
@@ -31,12 +31,20 @@ jobs:
     - name: Test solution
       run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./codecov.yml
 
+    - name: Build examples
+      run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net8.0
+
+    - name: Package NuGet
+      run: dotnet pack ./src/Frcs6.Extensions.Caching.MongoDB/Frcs6.Extensions.Caching.MongoDB.csproj -c Release --no-build -o ./artifact
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4.1.0
+      with:
+        name: Frcs6.Extensions.Caching.MongoDB
+        path: artifact
+
     - name: Codecov
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
-
-    - name: Build examples
-      run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net8.0
-

@@ -2,7 +2,7 @@ name: 'Pull requests'
 
 on:
   pull_request:
-    branches: [ 'main' ]
+    branches: [ 'main', 'develop' ]
     paths-ignore: [ '**.md' ]
 
 jobs:
@@ -30,13 +30,13 @@ jobs:
     - name: Test solution
       run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release -f net${{ matrix.dotnet-version }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./codecov.yml
 
+    - name: Build examples
+      if: ${{ contains(matrix.dotnet-version, '8.0') }}
+      run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net${{ matrix.dotnet-version }}
+
     - name: Codecov
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
         flags: dotnet-${{ matrix.dotnet-version }}
-
-    - name: Build examples
-      if: ${{ contains(matrix.dotnet-version, '8.0') }}
-      run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net${{ matrix.dotnet-version }}
