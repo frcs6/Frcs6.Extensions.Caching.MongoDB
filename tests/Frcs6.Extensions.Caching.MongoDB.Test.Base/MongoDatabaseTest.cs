@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Testcontainers.MongoDb;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Base;
 
+[ExcludeFromCodeCoverage]
 public sealed class MongoDatabaseTest : IDisposable
 {
     private bool _isDisposed;
