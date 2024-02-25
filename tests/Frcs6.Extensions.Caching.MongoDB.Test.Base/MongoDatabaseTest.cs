@@ -1,19 +1,21 @@
+using System.Diagnostics.CodeAnalysis;
 using Testcontainers.MongoDb;
 
-namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated.Common;
+namespace Frcs6.Extensions.Caching.MongoDB.Test.Base;
 
-public sealed class MongoDatabaseFixture : IDisposable
+[ExcludeFromCodeCoverage]
+public sealed class MongoDatabaseTest : IDisposable
 {
     private bool _isDisposed;
     private readonly MongoDbContainer _container;
 
-    public MongoDatabaseFixture()
+    public MongoDatabaseTest()
     {
         _container = new MongoDbBuilder().Build();
         _container.StartAsync().Wait();
     }
 
-    ~MongoDatabaseFixture()
+    ~MongoDatabaseTest()
     {
         Dispose(false);
     }

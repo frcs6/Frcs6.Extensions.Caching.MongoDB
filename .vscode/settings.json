@@ -1,6 +1,8 @@
 {
-    "dotnet.defaultSolution": "src/Frcs6.Extensions.Caching.MongoDB.sln",
+    "dotnet.defaultSolution": "Frcs6.Extensions.Caching.MongoDB.sln",
     "coverage-gutters.coverageFileNames": [
-        "lcov.net8.0.info"
+        "lcov.net8.0.info",
+        "lcov.net7.0.info",
+        "lcov.net6.0.info"
     ]
 }

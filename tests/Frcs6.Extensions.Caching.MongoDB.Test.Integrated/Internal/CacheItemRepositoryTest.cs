@@ -2,12 +2,12 @@ using Microsoft.Extensions.Options;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated.Internal;
 
-public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseFixture>
+public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest>
 {
     private readonly MongoClient _mongoClient;
     private readonly IMongoCollection<CacheItem> _cacheItemCollection;
 
-    public CacheItemRepositoryTest(MongoDatabaseFixture mongoDatabase)
+    public CacheItemRepositoryTest(MongoDatabaseTest mongoDatabase)
     {
 #pragma warning disable CA1062 // Validate arguments of public methods
         _mongoClient = new MongoClient(mongoDatabase.GetConnectionString());
