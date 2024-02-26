@@ -2,17 +2,26 @@ name: 'Build and Release'
 
 on:
   push:
-    branches: [ 'main', 'develop' ]
-    tags: [ '*' ]
+    branches: [ 'main' ]
+    tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
     paths-ignore: [ '**.md' ]
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   
+    outputs: 
+      version: ${{ steps.version.outputs.full_without_prefix }}
  
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
+
+    - name: Compute version
+      if: github.ref_type == 'tag'
+      uses: nowsprinting/check-version-format-action@v4.0.1
+      id: version
+      with:
+        prefix: 'v'
 
     - name: Setup DotNet
       uses: actions/setup-dotnet@v4.0.0
@@ -26,7 +35,12 @@ jobs:
       run: dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
 
     - name: Build solution
+      if: github.ref_type == 'branch'
       run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release --no-restore
+
+    - name: Build solution with version
+      if: github.ref_type == 'tag'
+      run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release --no-restore /p:Version=${{ steps.version.outputs.full_without_prefix }}
 
     - name: Test solution
       run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./codecov.yml
@@ -35,16 +49,48 @@ jobs:
       run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net8.0
 
     - name: Package NuGet
-      run: dotnet pack ./src/Frcs6.Extensions.Caching.MongoDB/Frcs6.Extensions.Caching.MongoDB.csproj -c Release --no-build -o ./artifact
+      if: github.ref_type == 'tag'
+      run: dotnet pack ./src/Frcs6.Extensions.Caching.MongoDB/Frcs6.Extensions.Caching.MongoDB.csproj -c Release --no-build /p:PackageVersion=${{ steps.version.outputs.full_without_prefix }} -o ./artifact
 
     - name: Upload artifact
+      if: github.ref_type == 'tag'
       uses: actions/upload-artifact@v4.1.0
       with:
         name: Frcs6.Extensions.Caching.MongoDB
         path: artifact
 
     - name: Codecov
+      if: github.ref_type == 'branch'
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
+
+  publish_release:
+    if: github.ref_type == 'tag'
+    needs: build_and_test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        path: artifact
+        pattern: Frcs6.Extensions.Caching.MongoDB
+
+    - name: Zip artifact
+      run: find "." -maxdepth 1 -mindepth 1 -type d -exec zip -r "{}.zip" "{}" \;
+      working-directory: ./artifact
+
+    - name: Release artifact
+      uses: ncipollo/release-action@v1.13.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        allowUpdates: true
+        artifacts: "artifact/*.zip"
+        tag: ${{ github.ref }}
+        name: Release v${{ needs.build_and_test.outputs.version }}
+        draft: false
+        prerelease: false
+  
