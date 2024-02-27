@@ -46,6 +46,7 @@ jobs:
           /p:AssemblyVersion=${{ steps.version.outputs.assemblySemVer }} \
           /p:FileVersion=${{ steps.version.outputs.assemblySemFileVer }} \
           /p:InformationalVersion=${{ steps.version.outputs.Sha }}
+          -o ./artifact
 
     - name: Test solution
       run: |
@@ -55,7 +56,6 @@ jobs:
           /p:CollectCoverage=true \
           /p:CoverletOutputFormat=opencover \
           /p:CoverletOutput=./codecov.yml \
-          -o ./artifact
 
     - name: Build examples
       run: |
