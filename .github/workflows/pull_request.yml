@@ -3,7 +3,6 @@ name: 'Pull requests'
 on:
   pull_request:
     branches: [ 'main' ]
-    paths-ignore: [ '**.md' ]
 
 jobs:
   pr_build_and_test:
@@ -22,17 +21,32 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}.x
 
     - name: Restore solution
-      run: dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
+      run: |
+        dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
 
     - name: Build solution
-      run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release -f net${{ matrix.dotnet-version }} --no-restore
+      run: |
+        dotnet build Frcs6.Extensions.Caching.MongoDB.sln \
+          -c Release \
+          -f net${{ matrix.dotnet-version }} \
+          --no-restore
 
     - name: Test solution
-      run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release -f net${{ matrix.dotnet-version }} --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./codecov.yml
+      run: |
+        dotnet test Frcs6.Extensions.Caching.MongoDB.sln \
+          -c Release \
+          -f net${{ matrix.dotnet-version }} \
+          --no-build \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=opencover \
+          /p:CoverletOutput=./codecov.yml
 
     - name: Build examples
       if: ${{ contains(matrix.dotnet-version, '8.0') }}
-      run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net${{ matrix.dotnet-version }}
+      run: | 
+        dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln \
+          -c Release \
+          -f net${{ matrix.dotnet-version }}
 
     - name: Codecov
       uses: codecov/codecov-action@v4.0.1

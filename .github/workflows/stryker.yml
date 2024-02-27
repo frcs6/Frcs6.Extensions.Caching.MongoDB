@@ -21,7 +21,13 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Restore tools
-      run: dotnet tool restore
+      run: |
+        dotnet tool restore
 
     - name: Stryker
-      run: dotnet stryker -O ./artifact-stryker -r 'dashboard' --dashboard-api-key "${{ secrets.STRYKER_API_KEY }}" -v ${{ github.ref_name }}
+      run: |
+        dotnet stryker \
+          -O ./artifact-stryker \
+          -r 'dashboard' \
+          --dashboard-api-key "${{ secrets.STRYKER_API_KEY }}" \
+          -v ${{ github.ref_name }}

@@ -3,25 +3,27 @@ name: 'Build and Release'
 on:
   push:
     branches: [ 'main' ]
-    tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
-    paths-ignore: [ '**.md' ]
 
 jobs:
   build_and_test:
     runs-on: ubuntu-latest   
     outputs: 
-      version: ${{ steps.version.outputs.full_without_prefix }}
+      version: ${{ steps.version.outputs.majorMinorPatch }}
  
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
+      with:
+        fetch-depth: 0
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0
+      with:
+        versionSpec: '5.x'
 
     - name: Compute version
-      if: github.ref_type == 'tag'
-      uses: nowsprinting/check-version-format-action@v4.0.1
+      uses: gittools/actions/gitversion/execute@v0
       id: version
-      with:
-        prefix: 'v'
 
     - name: Setup DotNet
       uses: actions/setup-dotnet@v4.0.0
@@ -32,42 +34,56 @@ jobs:
           8.0.x
 
     - name: Restore solution
-      run: dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
-
-    - name: Build solution
-      if: github.ref_type == 'branch'
-      run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release --no-restore
+      run: |
+        dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
 
     - name: Build solution with version
-      if: github.ref_type == 'tag'
-      run: dotnet build Frcs6.Extensions.Caching.MongoDB.sln -c Release --no-restore /p:Version=${{ steps.version.outputs.full_without_prefix }}
+      run: |
+        dotnet build Frcs6.Extensions.Caching.MongoDB.sln \
+          -c Release \
+          --no-restore \
+          /p:Version=${{ steps.version.outputs.majorMinorPatch }}
+          /p:AssemblyVersion=${{ steps.version.outputs.assemblySemVer }}
+          /p:FileVersion=${{ steps.version.outputs.assemblySemFileVer }}
+          /p:InformationalVersion=${{ steps.version.outputs.Sha }}
 
     - name: Test solution
-      run: dotnet test Frcs6.Extensions.Caching.MongoDB.sln  -c Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./codecov.yml
+      run: |
+        dotnet test Frcs6.Extensions.Caching.MongoDB.sln  \
+          -c Release \
+          --no-build \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=opencover \
+          /p:CoverletOutput=./codecov.yml \
+          -o ./artifact
 
     - name: Build examples
-      run: dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln -c Release -f net8.0
+      run: |
+        dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln \
+          -c Release \
+          -f net8.0
 
     - name: Package NuGet
-      if: github.ref_type == 'tag'
-      run: dotnet pack ./src/Frcs6.Extensions.Caching.MongoDB/Frcs6.Extensions.Caching.MongoDB.csproj -c Release --no-build /p:PackageVersion=${{ steps.version.outputs.full_without_prefix }} -o ./artifact
+      run: |
+        dotnet pack ./src/Frcs6.Extensions.Caching.MongoDB/Frcs6.Extensions.Caching.MongoDB.csproj \
+          -c Release \
+          --no-build \
+          /p:PackageVersion=${{ steps.version.outputs.nuGetVersionV2 }} \
+          -o ./artifact
 
     - name: Upload artifact
-      if: github.ref_type == 'tag'
       uses: actions/upload-artifact@v4.1.0
       with:
         name: Frcs6.Extensions.Caching.MongoDB
         path: artifact
 
     - name: Publish coverage to Codecov
-      if: github.ref_type == 'branch'
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
 
   publish_release:
-    if: github.ref_type == 'tag'
     needs: build_and_test
     runs-on: ubuntu-latest
 
@@ -79,7 +95,8 @@ jobs:
         pattern: Frcs6.Extensions.Caching.MongoDB
 
     - name: Zip artifact
-      run: find "." -maxdepth 1 -mindepth 1 -type d -exec zip -r "{}.zip" "{}" \;
+      run: |
+        find "." -maxdepth 1 -mindepth 1 -type d -exec zip -r "{}.zip" "{}" \;
       working-directory: ./artifact
 
     - name: Release artifact
@@ -94,32 +111,34 @@ jobs:
         draft: false
         prerelease: false
   
-  publish_nuget:
-    if: github.ref_type == 'tag'
-    needs: build_and_test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        registry: [github, nuget_org]
-        include:
-          - registry: github
-            source: https://nuget.pkg.github.com/frcs6/index.json
-            api_key: GITHUB_TOKEN
-          - registry: nuget_org
-            source: https://api.nuget.org/v3/index.json
-            api_key: NUGET_API_KEY
+  # publish_nuget:
+  #   needs: build_and_test
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       registry: [github, nuget_org]
+  #       include:
+  #         - registry: github
+  #           source: https://nuget.pkg.github.com/frcs6/index.json
+  #           api_key: GITHUB_TOKEN
+  #         - registry: nuget_org
+  #           source: https://api.nuget.org/v3/index.json
+  #           api_key: NUGET_API_KEY
 
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        path: artifact
-        pattern: Frcs6.Extensions.Caching.MongoDB
+  #   steps:
+  #   - name: Download artifact
+  #     uses: actions/download-artifact@v4
+  #     with:
+  #       path: artifact
+  #       pattern: Frcs6.Extensions.Caching.MongoDB
 
-    - name: Setup DotNet
-      uses: actions/setup-dotnet@v4.0.0
-      with:
-        dotnet-version: 8.0.x
+  #   - name: Setup DotNet
+  #     uses: actions/setup-dotnet@v4.0.0
+  #     with:
+  #       dotnet-version: 8.0.x
 
-    - name: Push to NuGet to ${{ matrix.registry }}_registry
-      run: dotnet nuget push ./artifact/**/*.nupkg --source ${{ matrix.source }} --api-key ${{ secrets[matrix.api_key] }}
+  #   - name: Push to NuGet to ${{ matrix.registry }}_registry
+  #     run: |
+  #       dotnet nuget push ./artifact/**/*.nupkg \
+  #         --source ${{ matrix.source }} \
+  #         --api-key ${{ secrets[matrix.api_key] }}
