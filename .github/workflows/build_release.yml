@@ -37,7 +37,7 @@ jobs:
       run: |
         dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
 
-    - name: Build solution
+    - name: Build solution with version
       run: |
         dotnet build Frcs6.Extensions.Caching.MongoDB.sln \
           -c Release \
@@ -45,8 +45,7 @@ jobs:
           /p:Version=${{ steps.version.outputs.majorMinorPatch }} \
           /p:AssemblyVersion=${{ steps.version.outputs.assemblySemVer }} \
           /p:FileVersion=${{ steps.version.outputs.assemblySemFileVer }} \
-          /p:InformationalVersion=${{ steps.version.outputs.Sha }} \
-          -o ./artifact
+          /p:InformationalVersion=${{ steps.version.outputs.Sha }}
 
     - name: Test solution
       run: |
@@ -55,7 +54,7 @@ jobs:
           --no-build \
           /p:CollectCoverage=true \
           /p:CoverletOutputFormat=opencover \
-          /p:CoverletOutput=./codecov.yml \
+          /p:CoverletOutput=./codecov.yml
 
     - name: Build examples
       run: |
@@ -94,18 +93,13 @@ jobs:
         path: artifact
         pattern: Frcs6.Extensions.Caching.MongoDB
 
-    - name: Zip artifact
-      run: |
-        find "." -maxdepth 1 -mindepth 1 -type d -exec zip -r "{}.zip" "{}" \;
-      working-directory: ./artifact
-
     - name: Release artifact
       uses: ncipollo/release-action@v1.13.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         allowUpdates: true
-        artifacts: "artifact/*.zip"
+        artifacts: "artifact/**/*.nupkg"
         tag: ${{ github.ref }}
         name: Release v${{ needs.build_and_test.outputs.version }}
         draft: false
