@@ -94,7 +94,7 @@ jobs:
         draft: false
         prerelease: false
   
-  publish_nuget_org:
+  publish_github_registry:
     if: github.ref_type == 'tag'
     needs: build_and_test
     runs-on: ubuntu-latest
@@ -106,5 +106,20 @@ jobs:
         path: artifact
         pattern: Frcs6.Extensions.Caching.MongoDB
 
-    - name: Push to Nuget.org
+    - name: Push to NuGet to GitHub registry
+      run: dotnet nuget push ./artifact/**/*.nupkg --source https://nuget.pkg.github.com/frcs6/index.json --api-key ${{ secrets.GITHUB_TOKEN }}
+  
+  publish_nuget_org_registry:
+    if: github.ref_type == 'tag'
+    needs: build_and_test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        path: artifact
+        pattern: Frcs6.Extensions.Caching.MongoDB
+
+    - name: Push to NuGet.org registry
       run: dotnet nuget push ./artifact/**/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
