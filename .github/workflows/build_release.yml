@@ -59,7 +59,7 @@ jobs:
         name: Frcs6.Extensions.Caching.MongoDB
         path: artifact
 
-    - name: Codecov
+    - name: Publish coverage to Codecov
       if: github.ref_type == 'branch'
       uses: codecov/codecov-action@v4.0.1
       with:
