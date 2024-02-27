@@ -42,9 +42,9 @@ jobs:
         dotnet build Frcs6.Extensions.Caching.MongoDB.sln \
           -c Release \
           --no-restore \
-          /p:Version=${{ steps.version.outputs.majorMinorPatch }}
-          /p:AssemblyVersion=${{ steps.version.outputs.assemblySemVer }}
-          /p:FileVersion=${{ steps.version.outputs.assemblySemFileVer }}
+          /p:Version=${{ steps.version.outputs.majorMinorPatch }} \
+          /p:AssemblyVersion=${{ steps.version.outputs.assemblySemVer }} \
+          /p:FileVersion=${{ steps.version.outputs.assemblySemFileVer }} \
           /p:InformationalVersion=${{ steps.version.outputs.Sha }}
 
     - name: Test solution
