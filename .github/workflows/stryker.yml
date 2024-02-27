@@ -24,19 +24,4 @@ jobs:
       run: dotnet tool restore
 
     - name: Stryker
-      run: dotnet stryker -O ./artifact-stryker -r 'Json'
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4.1.0
-      with:
-        name: stryker
-        path: artifact-stryker/reports/mutation-report.json
-
-    - name: Publish report to Stryker Dashboard
-      run: |
-        curl -X PUT \
-          https://dashboard.stryker-mutator.io/api/reports/github.com/frcs6/Frcs6.Extensions.Caching.MongoDB/${{ github.ref_name }} \
-          -H 'Content-Type: application/json' \
-          -H 'Host: dashboard.stryker-mutator.io' \
-          -H 'X-Api-Key: ${{ secrets.STRYKER_API_KEY }}' \
-          -d ./artifact-stryker/reports/mutation-report.json
+      run: dotnet stryker -O ./artifact-stryker -r 'dashboard' --dashboard-api-key "${{ secrets.STRYKER_API_KEY }}" -v ${{ github.ref_name }}
