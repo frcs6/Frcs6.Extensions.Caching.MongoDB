@@ -45,7 +45,7 @@ jobs:
           /p:Version=${{ steps.version.outputs.majorMinorPatch }} \
           /p:AssemblyVersion=${{ steps.version.outputs.assemblySemVer }} \
           /p:FileVersion=${{ steps.version.outputs.assemblySemFileVer }} \
-          /p:InformationalVersion=${{ steps.version.outputs.Sha }}
+          /p:InformationalVersion=${{ steps.version.outputs.Sha }} \
           -o ./artifact
 
     - name: Test solution
