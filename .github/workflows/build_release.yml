@@ -122,4 +122,4 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Push to NuGet to ${{ matrix.registry }}_registry
-      run: dotnet nuget push ./artifact/**/*.nupkg --source ${{ matrix.source }}--api-key ${{ secrets[matrix.api_key] }}
+      run: dotnet nuget push ./artifact/**/*.nupkg --source ${{ matrix.source }} --api-key ${{ secrets[matrix.api_key] }}
