@@ -13,14 +13,13 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         _mongoClient = new MongoClient(mongoDatabase.GetConnectionString());
 #pragma warning restore CA1062 // Validate arguments of public methods
         Fixture.Register<IMongoClient>(() => _mongoClient);
-        Fixture.Register(() => new SharedContext(Options.Create(MongoCacheOptions)));
         _cacheItemCollection = _mongoClient.GetDatabase(DatabaseName).GetCollection<CacheItem>(CollectionName);
     }
 
     [Fact]
     public void GivenCacheItem_WhenRead_ThenReadCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         var result = sut.Read(cacheItem.Key!);
         result.Should().BeNull();
@@ -33,7 +32,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public async Task GivenCacheItem_WhenReadAsync_ThenReadCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         var result = await sut.ReadAsync(cacheItem.Key!, default);
         result.Should().BeNull();
@@ -46,7 +45,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public void GivenCacheItem_WhenWrite_ThenWriteCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
 
         sut.Write(cacheItem);
@@ -58,7 +57,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public async Task GivenCacheItem_WhenWriteSync_ThenWriteCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
 
         await sut.WriteAsync(cacheItem, default);
@@ -70,7 +69,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public void GivenCacheItem_WhenReadPartial_ThenReadCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         var result = sut.ReadPartial(cacheItem.Key!);
         result.Should().BeNull();
@@ -88,7 +87,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public async Task GivenCacheItem_WhenReadPartialAsync_ThenReadCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         var result = await sut.ReadPartialAsync(cacheItem.Key!, default);
         result.Should().BeNull();
@@ -106,7 +105,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public void GivenCacheItem_WhenWritePartial_ThenWriteCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         _cacheItemCollection.InsertOne(cacheItem);
         var newCacheItem = Fixture
@@ -133,7 +132,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public async Task GivenCacheItem_WhenWritePartialAsync_ThenWriteCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         await _cacheItemCollection.InsertOneAsync(cacheItem);
         var newCacheItem = Fixture
@@ -160,7 +159,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public void GivenCacheItemDeleted_WhenWritePartial_ThenNoWriteCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
 
         sut.WritePartial(cacheItem);
@@ -172,7 +171,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public async Task GivenCacheItemDeleted_WhenWritePartialSync_ThenNoWriteCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
 
         await sut.WritePartialAsync(cacheItem, default);
@@ -184,7 +183,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public void GivenCacheItem_WhenRemove_ThenRemoveCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         _cacheItemCollection.InsertOne(cacheItem);
 
@@ -197,7 +196,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public async Task GivenCacheItem_WhenRemoveAsync_ThenRemoveCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         await _cacheItemCollection.InsertOneAsync(cacheItem);
 
@@ -210,7 +209,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public void GivenCacheItem_WhenRemoveExpired_ThenRemoveCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         sut.RemoveExpired();
@@ -225,7 +224,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public void GivenRemoveExpiredDelayNotReach_WhenRemoveExpired_ThenKeepCollection()
     {
-        var sut = GetSut(TimeSpan.FromHours(2));
+        using var sut = GetSut(TimeSpan.FromHours(2));
         sut.RemoveExpired();
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
@@ -241,7 +240,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public void GivenRemoveExpiredDelayReach_WhenRemoveExpired_ThenRemoveCollection()
     {
-        var sut = GetSut(TimeSpan.FromHours(2));
+        using var sut = GetSut(TimeSpan.FromHours(2));
         sut.RemoveExpired();
         ConfigureUtcNow(UtcNow.AddHours(3));
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
@@ -258,7 +257,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public async Task GivenCacheItem_WhenRemoveExpiredAsync_ThenRemoveCollection()
     {
-        var sut = GetSut();
+        using var sut = GetSut();
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         await sut.RemoveExpiredAsync(default);
@@ -273,7 +272,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public async Task GivenRemoveExpiredDelayNotReach_WhenRemoveExpiredAsync_ThenKeepCollection()
     {
-        var sut = GetSut(TimeSpan.FromHours(2));
+        using var sut = GetSut(TimeSpan.FromHours(2));
         await sut.RemoveExpiredAsync(default);
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
@@ -289,7 +288,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     [Fact]
     public async Task GivenRemoveExpiredDelayReach_WhenRemoveExpiredAsync_ThenRemoveCollection()
     {
-        var sut = GetSut(TimeSpan.FromHours(2));
+        using var sut = GetSut(TimeSpan.FromHours(2));
         await sut.RemoveExpiredAsync(default);
         ConfigureUtcNow(UtcNow.AddHours(3));
         (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
