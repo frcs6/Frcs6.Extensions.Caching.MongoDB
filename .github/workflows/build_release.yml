@@ -85,7 +85,7 @@ jobs:
   publish_release:
     needs: build_and_test
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
@@ -96,7 +96,7 @@ jobs:
     - name: Release artifact
       uses: ncipollo/release-action@v1.13.0
       env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         allowUpdates: true
         artifacts: "artifact/**/*.nupkg"
