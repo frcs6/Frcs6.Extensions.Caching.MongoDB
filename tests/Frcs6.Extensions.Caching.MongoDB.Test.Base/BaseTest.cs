@@ -24,7 +24,7 @@ public abstract class BaseTest
     protected byte[] DefaultValue { get; }
     protected CancellationToken DefaultToken { get; } = CancellationToken.None;
     protected DateTimeOffset UtcNow => _utcNow;
-    protected MongoCacheOptions MongoCacheOptions { get; } = new() { DatabaseName = DatabaseName, CollectionName = CollectionName };
+    protected MongoCacheOptions MongoCacheOptions { get; } = new() { DatabaseName = DatabaseName, CollectionName = CollectionName, AllowNoExpiration = true };
 
 #if NET8_0_OR_GREATER
     private readonly FakeTimeProvider _timeProvider = new();
