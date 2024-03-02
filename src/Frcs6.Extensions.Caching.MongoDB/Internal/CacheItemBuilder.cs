@@ -1,24 +1,21 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-#if NET8_0_OR_GREATER
-internal sealed class CacheItemBuilder(
-    TimeProvider _timeProvider,
-    IOptions<MongoCacheOptions> _mongoCacheOptions) : ICacheItemBuilder
-{
-    private readonly TimeProvider _timeProvider = _timeProvider;
-    private readonly IOptions<MongoCacheOptions> _mongoCacheOptions = _mongoCacheOptions;
-#else
+#if !NET8_0_OR_GREATER
+using TimeProvider = Microsoft.Extensions.Internal.ISystemClock;
+#endif
+
 internal sealed class CacheItemBuilder : ICacheItemBuilder
 {
-    private readonly ISystemClock _timeProvider;
+    private readonly TimeProvider _timeProvider;
     private readonly IOptions<MongoCacheOptions> _mongoCacheOptions;
 
-    public CacheItemBuilder(ISystemClock timeProvider, IOptions<MongoCacheOptions> mongoCacheOptions)
+#pragma warning disable IDE0290 // Use primary constructor
+    public CacheItemBuilder(TimeProvider timeProvider, IOptions<MongoCacheOptions> mongoCacheOptions)
+#pragma warning restore IDE0290 // Use primary constructor
     {
         _timeProvider = timeProvider;
         _mongoCacheOptions = mongoCacheOptions;
     }
-#endif
 
     public CacheItem Build(string key, byte[] value, DistributedCacheEntryOptions options)
     {

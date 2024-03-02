@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using Frcs6.Extensions.Caching.MongoDB;
+﻿using Frcs6.Extensions.Caching.MongoDB;
 using Frcs6.Extensions.Caching.MongoDB.Test.Base;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;

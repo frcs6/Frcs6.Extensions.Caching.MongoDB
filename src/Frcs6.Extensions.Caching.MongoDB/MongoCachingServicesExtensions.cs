@@ -1,6 +1,10 @@
 ﻿using Frcs6.Extensions.Caching.MongoDB.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
+#if !NET8_0_OR_GREATER
+using Microsoft.Extensions.Internal;
+#endif
+
 namespace Frcs6.Extensions.Caching.MongoDB;
 
 public static class MongoCachingServicesExtensions
@@ -24,25 +28,17 @@ public static class MongoCachingServicesExtensions
                                     throw new InvalidOperationException("No MongoCache options found.");
 
             return new MongoCache(
-                new CacheItemBuilder(
-#if NET8_0_OR_GREATER
-                    TimeProvider.System,
-#else
-                    new SystemClock(),
-#endif
-                    mongoCacheOptions),
-                new CacheItemRepository(
-                    mongoClient,
-#if NET8_0_OR_GREATER
-                    TimeProvider.System,
-#else
-                    new SystemClock(),
-#endif
-                    new SharedContext(mongoCacheOptions),
-                    mongoCacheOptions)
+                new CacheItemBuilder(DefaultTimeProvider(), mongoCacheOptions),
+                new CacheItemRepository(mongoClient, DefaultTimeProvider(), mongoCacheOptions)
             );
         }));
 
         return services;
     }
+
+#if NET8_0_OR_GREATER
+    private static TimeProvider DefaultTimeProvider() => TimeProvider.System;
+#else
+    private static SystemClock DefaultTimeProvider() => new();
+#endif
 }

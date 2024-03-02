@@ -1,24 +1,21 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-#if NET8_0_OR_GREATER
-internal sealed class MongoCache(
-    ICacheItemBuilder _cacheItemBuilder,
-    ICacheItemRepository _cacheItemRepository) : IDistributedCache
-{
-    private readonly ICacheItemBuilder _cacheItemBuilder = _cacheItemBuilder;
-    private readonly ICacheItemRepository _cacheItemRepository = _cacheItemRepository;
-#else
+#if !NET8_0_OR_GREATER
+using TimeProvider = Microsoft.Extensions.Internal.ISystemClock;
+#endif
+
 internal sealed class MongoCache : IDistributedCache
 {
     private readonly ICacheItemBuilder _cacheItemBuilder;
     private readonly ICacheItemRepository _cacheItemRepository;
 
+#pragma warning disable IDE0290 // Use primary constructor
     public MongoCache(ICacheItemBuilder cacheItemBuilder, ICacheItemRepository cacheItemRepository)
+#pragma warning restore IDE0290 // Use primary constructor
     {
         _cacheItemBuilder = cacheItemBuilder;
         _cacheItemRepository = cacheItemRepository;
     }
-#endif
 
     public byte[]? Get(string key)
     {

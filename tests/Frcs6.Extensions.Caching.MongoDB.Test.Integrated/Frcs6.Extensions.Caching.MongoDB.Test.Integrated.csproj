@@ -2,6 +2,10 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Frcs6.Extensions.Caching.MongoDB.Test.Base\Frcs6.Extensions.Caching.MongoDB.Test.Base.csproj" />
-  </ItemGroup>   
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
 
 </Project>

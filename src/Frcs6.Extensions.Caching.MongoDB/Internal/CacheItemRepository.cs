@@ -1,35 +1,36 @@
 ﻿namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-internal sealed class CacheItemRepository : ICacheItemRepository
+#if !NET8_0_OR_GREATER
+using TimeProvider = Microsoft.Extensions.Internal.ISystemClock;
+#endif
+
+internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
 {
     private static readonly ReplaceOptions DefaultReplaceOptions = new() { IsUpsert = true };
     private static readonly UpdateOptions DefaultUpdateOptions = new() { IsUpsert = false };
 
     private readonly IMongoCollection<CacheItem> _cacheItemCollection;
-    private readonly SharedContext _sharedContext;
-
-#if NET8_0_OR_GREATER
     private readonly TimeProvider _timeProvider;
-#else
-    private readonly ISystemClock _timeProvider;
-#endif
+    private readonly TimeSpan? _removeExpiredDelay;
+
+    private readonly SemaphoreSlim _lockNextRemoveExpired = new(1, 1);
+    private DateTimeOffset? _nextRemoveExpired;
 
     public CacheItemRepository(
         IMongoClient mongoClient,
-#if NET8_0_OR_GREATER
         TimeProvider timeProvider,
-#else
-        ISystemClock timeProvider,
-#endif
-        SharedContext sharedContext,
         IOptions<MongoCacheOptions> mongoCacheOptions)
     {
         ValidateOptions(mongoCacheOptions.Value);
         _cacheItemCollection = GetCollection(mongoClient, mongoCacheOptions.Value);
         _timeProvider = timeProvider;
-        _sharedContext = sharedContext;
-
+        _removeExpiredDelay = mongoCacheOptions.Value.RemoveExpiredDelay;
         InitializeIndex();
+    }
+
+    public void Dispose()
+    {
+        _lockNextRemoveExpired.Dispose();
     }
 
     public CacheItem Read(string key)
@@ -126,26 +127,26 @@ internal sealed class CacheItemRepository : ICacheItemRepository
         var removeExpired = () => _cacheItemCollection.DeleteMany(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks));
 #pragma warning restore IDE0039 // Use local function
 
-        _sharedContext.LockNextRemoveExpired.Wait();
+        _lockNextRemoveExpired.Wait();
         try
         {
-            if (!_sharedContext.RemoveExpiredDelay.HasValue)
+            if (!_removeExpiredDelay.HasValue)
             {
                 removeExpired();
             }
             else
             {
                 var utcNow = _timeProvider.GetUtcNow();
-                if (!_sharedContext.NextRemoveExpired.HasValue || utcNow >= _sharedContext.NextRemoveExpired.Value)
+                if (!_nextRemoveExpired.HasValue || utcNow >= _nextRemoveExpired.Value)
                 {
                     removeExpired();
-                    _sharedContext.NextRemoveExpired = utcNow.Add(_sharedContext.RemoveExpiredDelay.Value);
+                    _nextRemoveExpired = utcNow.Add(_removeExpiredDelay.Value);
                 }
             }
         }
         finally
         {
-            _sharedContext.LockNextRemoveExpired.Release();
+            _lockNextRemoveExpired.Release();
         }
     }
 
@@ -155,52 +156,39 @@ internal sealed class CacheItemRepository : ICacheItemRepository
         var removeExpiredAsync = () => _cacheItemCollection.DeleteManyAsync(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks), token).ConfigureAwait(false);
 #pragma warning restore IDE0039 // Use local function
 
-        await _sharedContext.LockNextRemoveExpired.WaitAsync(token).ConfigureAwait(false);
+        await _lockNextRemoveExpired.WaitAsync(token).ConfigureAwait(false);
         try
         {
-            if (!_sharedContext.RemoveExpiredDelay.HasValue)
+            if (!_removeExpiredDelay.HasValue)
             {
                 await removeExpiredAsync();
             }
             else
             {
                 var utcNow = _timeProvider.GetUtcNow();
-                if (!_sharedContext.NextRemoveExpired.HasValue || utcNow >= _sharedContext.NextRemoveExpired.Value)
+                if (!_nextRemoveExpired.HasValue || utcNow >= _nextRemoveExpired.Value)
                 {
                     await removeExpiredAsync();
-                    _sharedContext.NextRemoveExpired = utcNow.Add(_sharedContext.RemoveExpiredDelay.Value);
+                    _nextRemoveExpired = utcNow.Add(_removeExpiredDelay.Value);
                 }
             }
         }
         finally
         {
-            _sharedContext.LockNextRemoveExpired.Release();
+            _lockNextRemoveExpired.Release();
         }
     }
 
 
     private void InitializeIndex()
     {
-        _sharedContext.LockNextRemoveExpired.Wait();
-        try
-        {
-            if (!_sharedContext.IndexCreated)
-            {
-                var notificationLogBuilder = Builders<CacheItem>.IndexKeys;
+        var notificationLogBuilder = Builders<CacheItem>.IndexKeys;
 
-                var indexModelByKey = new CreateIndexModel<CacheItem>(notificationLogBuilder.Ascending(x => x.Key));
-                _cacheItemCollection.Indexes.CreateOne(indexModelByKey);
+        var indexModelByKey = new CreateIndexModel<CacheItem>(notificationLogBuilder.Ascending(x => x.Key));
+        _cacheItemCollection.Indexes.CreateOne(indexModelByKey);
 
-                var indexModelExpireAt = new CreateIndexModel<CacheItem>(notificationLogBuilder.Ascending(x => x.ExpireAt));
-                _cacheItemCollection.Indexes.CreateOne(indexModelExpireAt);
-
-                _sharedContext.IndexCreated = true;
-            }
-        }
-        finally
-        {
-            _sharedContext.LockNextRemoveExpired.Release();
-        }
+        var indexModelExpireAt = new CreateIndexModel<CacheItem>(notificationLogBuilder.Ascending(x => x.ExpireAt));
+        _cacheItemCollection.Indexes.CreateOne(indexModelExpireAt);
     }
 
     private static FilterDefinition<CacheItem> FindByKey(string key)

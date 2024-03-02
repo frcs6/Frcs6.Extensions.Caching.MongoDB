@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-
-namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit.Internal;
+﻿namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit.Internal;
 
 public class CacheItemRepositoryTest : BaseTest
 {
@@ -12,7 +10,6 @@ public class CacheItemRepositoryTest : BaseTest
 
     public CacheItemRepositoryTest()
     {
-        Fixture.Register(() => new SharedContext(Options.Create(MongoCacheOptions)));
         _mongoClient = Fixture.Freeze<Mock<IMongoClient>>();
         _mongoClient.Setup(c => c.GetDatabase(DatabaseName, null)).Returns(_mongoDatabase.Object);
         _mongoDatabase.Setup(d => d.GetCollection<CacheItem>(CollectionName, null)).Returns(_mongoCollection.Object);

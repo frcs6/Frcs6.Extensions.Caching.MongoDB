@@ -24,7 +24,7 @@ jobs:
       run: |
         dotnet tool restore
 
-    - name: Stryker
+    - name: Run Stryker mutator
       run: |
         dotnet stryker \
           -O ./artifact-stryker \
