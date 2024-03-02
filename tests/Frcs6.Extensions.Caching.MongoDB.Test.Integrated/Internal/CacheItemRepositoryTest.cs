@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Options;
-
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated.Internal;
 
 public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest>

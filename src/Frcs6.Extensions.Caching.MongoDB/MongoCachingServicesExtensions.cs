@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 #if !NET8_0_OR_GREATER
 using Microsoft.Extensions.Internal;
-using TimeProvider = Microsoft.Extensions.Internal.ISystemClock;
 #endif
 
 namespace Frcs6.Extensions.Caching.MongoDB;
@@ -40,6 +39,6 @@ public static class MongoCachingServicesExtensions
 #if NET8_0_OR_GREATER
     private static TimeProvider DefaultTimeProvider() => TimeProvider.System;
 #else
-    private static SystemClock DefaultTimeProvider() => new SystemClock();
+    private static SystemClock DefaultTimeProvider() => new();
 #endif
 }

@@ -15,8 +15,8 @@ namespace Frcs6.Extensions.Caching.MongoDB.Test.Base;
 [ExcludeFromCodeCoverage]
 public abstract class BaseTest
 {
-    protected const string DatabaseName = "TestDatabase";
-    protected const string CollectionName = "CacheCollection";
+    public const string DatabaseName = "TestDatabase";
+    public const string CollectionName = "CacheCollection";
 
     protected IFixture Fixture => _fixture ?? CreateFixture();
 

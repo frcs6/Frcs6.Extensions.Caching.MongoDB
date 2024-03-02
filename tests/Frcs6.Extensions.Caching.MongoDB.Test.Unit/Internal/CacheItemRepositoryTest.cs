@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-
-namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit.Internal;
+﻿namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit.Internal;
 
 public class CacheItemRepositoryTest : BaseTest
 {
