@@ -1,6 +1,6 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-internal interface ICacheItemRepository
+internal interface ICacheItemRepository : IDisposable
 {
     CacheItem Read(string key);
     Task<CacheItem> ReadAsync(string key, CancellationToken token);
