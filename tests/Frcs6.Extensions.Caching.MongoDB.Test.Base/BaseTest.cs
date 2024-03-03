@@ -28,8 +28,10 @@ public abstract class BaseTest
 
 #if NET8_0_OR_GREATER
     private readonly FakeTimeProvider _timeProvider = new();
+    protected TimeProvider TimeProvider => _timeProvider ;
 #else
     private readonly Mock<ISystemClock> _timeProvider = new();
+    protected ISystemClock TimeProvider => _timeProvider.Object;
 #endif
 
     private Fixture? _fixture;
