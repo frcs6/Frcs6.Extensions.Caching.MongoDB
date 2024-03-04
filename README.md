@@ -9,23 +9,28 @@
 
 This implementation is based on the official version for Sql Server and Redis available [here](https://github.com/dotnet/aspnetcore/tree/main/src/Caching).
 
-## Installation
+## Installation / Usage
 
 - Add package [Frcs6.Extensions.Caching.MongoDB](https://www.nuget.org/packages/Frcs6.Extensions.Caching.MongoDB/).
-- Inject MongoCache using ```MongoCachingServicesExtensions.AddMongoCache``` method.
+- Inject Mongo cache using ```MongoCachingServicesExtensions.AddMongoCache```.
 - Use ```IDistributedCache``` where you need it.
 
 Some examples are available [here](./examples/).
 
-## Configuration
+## MongoCache injection
 
-You can configure database connection in 3 ways :
+You cand inject Mongo cache using ```MongoCachingServicesExtensions.AddMongoCache``` method with one of these parameters :
+  - ```ConnectionString```.
+  - ```MongoClientSettings```.
+  - ```IMongoClient```.
 
-- With connection string.
-- By passing a ```MongoClientSettings```.
-- By passing a ```IMongoClient```.
+```MongoClientSettings``` can be useful if you need to pass a certificate. You can read the official Mongo documentation [Enable TLS on a Connection](https://www.mongodb.com/docs/drivers/csharp/current/fundamentals/connection/tls/).
 
-```cssharp
+### Examples
+
+#### With connection string
+
+```cs
 const string connectionString = "mongodb://localhost:27017";
 builder.Services.AddMongoCache(connectionString, options =>
 {
@@ -35,9 +40,9 @@ builder.Services.AddMongoCache(connectionString, options =>
 });
 ```
 
-MongoClientSettings can be useful if you need to pass a certificate. 
+#### With MongoClientSettings
 
-```cssharp
+```cs
 var cert = new X509Certificate2("client.p12", "mySuperSecretPassword");
 var settings = new MongoClientSettings
 {
@@ -56,15 +61,17 @@ builder.Services.AddMongoCache(settings, options =>
 });
 ```
 
-You can read [Official Mongo documentation](https://www.mongodb.com/docs/drivers/csharp/current/fundamentals/connection/tls/).
+## MongoCacheOptions
 
-## Cache option
+- ```DatabaseName```: Name of the cache database (**required**).
+- ```CollectionName```: Name of the cache collection (**required**).
+- ```AllowNoExpiration```: Allow item without expiration (**default false**).
+- ```RemoveExpiredDelay```: Delay between each cache clean (**default null**).
 
-- DatabaseName: Name of the cache database.
-- CollectionName: Name of the cache collection.
-- AllowNoExpiration: Allow item without expiration.
-- RemoveExpiredDelay: Delay between each cache clean.
+## Removing expired elements
 
-## Cache cleanup
+Removing expired elements is automatic. The only option you have to set is ```RemoveExpiredDelay```.
 
-Cache cleaning will be launched on each cache call (Get, Set, Refresh) if the timeout is reached.
+If ```RemoveExpiredDelay``` is not set, cleaning will launch on each cache access (Get, Set, Refresh).
+
+**TODO**: Add a [jobs](https://github.com/frcs6/Frcs6.Extensions.Caching.MongoDB/issues/38) to remove expired item.

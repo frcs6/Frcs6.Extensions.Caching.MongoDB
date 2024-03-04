@@ -7,7 +7,7 @@ using var mongoDatabase = new MongoDatabaseTest();
 var serviceProvider = new ServiceCollection().AddMongoCache(mongoDatabase.GetConnectionString(), options =>
 {
     options.DatabaseName = "mongocache-examples";
-    options.CollectionName = "mongocache-webapi";
+    options.CollectionName = "mongocache-consoleapp";
     options.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
 }).BuildServiceProvider();
 
