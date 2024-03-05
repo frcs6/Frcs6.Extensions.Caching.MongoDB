@@ -35,7 +35,7 @@ public partial class MongoCacheTest : BaseTest
     public void GivenKey_WhenGet_ThenRemoveExpired()
     {
         _sut.Get(DefaultKey);
-        _cacheItemRepository.Verify(r => r.RemoveExpired(), Times.Once);
+        _cacheItemRepository.Verify(r => r.RemoveExpired(false), Times.Once);
     }
 
     [Fact]
@@ -156,7 +156,7 @@ public partial class MongoCacheTest : BaseTest
     public void GivenArguments_WhenSet_ThenRemoveExpired()
     {
         _sut.Set(DefaultKey, DefaultValue, _options);
-        _cacheItemRepository.Verify(r => r.RemoveExpired(), Times.Once);
+        _cacheItemRepository.Verify(r => r.RemoveExpired(false), Times.Once);
     }
 
     [Fact]
@@ -225,7 +225,7 @@ public partial class MongoCacheTest : BaseTest
     public void GivenKey_WhenRefresh_ThenRemoveExpired()
     {
         _sut.Refresh(DefaultKey);
-        _cacheItemRepository.Verify(r => r.RemoveExpired(), Times.Once);
+        _cacheItemRepository.Verify(r => r.RemoveExpired(false), Times.Once);
     }
 
     [Fact]
@@ -301,7 +301,7 @@ public partial class MongoCacheTest : BaseTest
     public void GivenKey_WhenRemove_ThenRemoveExpired()
     {
         _sut.Remove(DefaultKey);
-        _cacheItemRepository.Verify(r => r.RemoveExpired(), Times.Once);
+        _cacheItemRepository.Verify(r => r.RemoveExpired(false), Times.Once);
     }
 
     [Fact]

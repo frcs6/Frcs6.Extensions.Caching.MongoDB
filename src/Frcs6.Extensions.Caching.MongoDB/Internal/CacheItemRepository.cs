@@ -29,9 +29,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
     }
 
     public void Dispose()
-    {
-        _lockNextRemoveExpired.Dispose();
-    }
+        => _lockNextRemoveExpired.Dispose();
 
     public CacheItem Read(string key)
     {
@@ -121,11 +119,17 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
             .ConfigureAwait(false);
     }
 
-    public void RemoveExpired()
+    public void RemoveExpired(bool force = false)
     {
 #pragma warning disable IDE0039 // Use local function
         var removeExpired = () => _cacheItemCollection.DeleteMany(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks));
 #pragma warning restore IDE0039 // Use local function
+
+        if(force)
+        {
+            removeExpired();
+            return;
+        }
 
         _lockNextRemoveExpired.Wait();
         try
