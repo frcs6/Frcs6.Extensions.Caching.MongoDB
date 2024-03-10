@@ -25,7 +25,10 @@ internal sealed class CleanCacheJobs : IHostedService, IDisposable
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
-        => Task.CompletedTask;
+    {
+        _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        return Task.CompletedTask;
+    }
 
     public void Dispose()
         => _timer.Dispose();
