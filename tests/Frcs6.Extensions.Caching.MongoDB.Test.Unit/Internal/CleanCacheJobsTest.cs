@@ -11,6 +11,7 @@ public class CleanCacheJobsTest : BaseTest
     public CleanCacheJobsTest()
     {
         _cacheItemRepository = Fixture.Freeze<Mock<ICacheItemRepository>>();
+        MongoCacheOptions.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
         _sut = Fixture.Create<CleanCacheJobs>();
     }
 
@@ -25,10 +26,10 @@ public class CleanCacheJobsTest : BaseTest
     [Fact]
     public void GivenJobs_WhenExecute_ThenRemoveExpired()
     {
-        MongoCacheOptions.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
-
         _sut.StartAsync(default);
+#pragma warning disable CS8629 // Nullable value type may be null.
         Thread.Sleep(MongoCacheOptions.RemoveExpiredDelay.Value);
+#pragma warning restore CS8629 // Nullable value type may be null.
         _sut.StopAsync(default);
 
         _cacheItemRepository.Verify(r => r.RemoveExpired(true), Times.AtLeastOnce);
