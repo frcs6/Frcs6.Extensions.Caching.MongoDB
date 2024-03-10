@@ -14,6 +14,7 @@ public class CleanCacheJobsTest : BaseTest
         _sut = Fixture.Create<CleanCacheJobs>();
     }
 
+    [Fact]
     public void GivenNullRemoveExpiredDelay_WhenCtor_ThenArgumentNullException()
     {
         MongoCacheOptions.RemoveExpiredDelay = null;
@@ -21,6 +22,7 @@ public class CleanCacheJobsTest : BaseTest
         act.Should().Throw<ArgumentNullException>();
     }
 
+    [Fact]
     public void GivenJobs_WhenExecute_ThenRemoveExpired()
     {
         MongoCacheOptions.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
