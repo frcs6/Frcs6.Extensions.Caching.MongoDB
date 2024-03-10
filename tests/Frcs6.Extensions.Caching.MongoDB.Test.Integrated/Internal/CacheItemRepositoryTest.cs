@@ -253,6 +253,22 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     }
 
     [Fact]
+    public void GivenRemoveExpiredDelayNotReachButForce_WhenRemoveExpired_ThenKeepCollection()
+    {
+        using var sut = GetSut(TimeSpan.FromHours(2));
+        sut.RemoveExpired();
+        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+
+        sut.RemoveExpired(true);
+
+        using (new AssertionScope())
+        {
+            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+        }
+    }
+
+    [Fact]
     public async Task GivenCacheItem_WhenRemoveExpiredAsync_ThenRemoveCollection()
     {
         using var sut = GetSut();
