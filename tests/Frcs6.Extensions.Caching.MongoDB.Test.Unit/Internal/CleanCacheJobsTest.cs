@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using Org.BouncyCastle.Asn1.Cms;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit.Internal;
 
@@ -28,7 +27,7 @@ public class CleanCacheJobsTest : BaseTest
     {
         _sut.StartAsync(default);
 #pragma warning disable CS8629 // Nullable value type may be null.
-        Thread.Sleep(MongoCacheOptions.RemoveExpiredDelay.Value);
+        Thread.Sleep(2 * MongoCacheOptions.RemoveExpiredDelay.Value);
 #pragma warning restore CS8629 // Nullable value type may be null.
         _sut.StopAsync(default);
 
