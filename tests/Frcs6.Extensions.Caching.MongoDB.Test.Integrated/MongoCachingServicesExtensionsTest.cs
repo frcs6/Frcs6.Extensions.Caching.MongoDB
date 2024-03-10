@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated;
 
@@ -38,6 +39,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
             options.CollectionName = BaseTest.CollectionName;
         });
         AssertSingletonMongoCache();
+        AssertNoCleanCacheJobs();
     }
 
     [Fact]
@@ -50,6 +52,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
             options.CollectionName = BaseTest.CollectionName;
         });
         AssertSingletonMongoCache();
+        AssertNoCleanCacheJobs();
     }
 
     [Fact]
@@ -62,6 +65,22 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
             options.CollectionName = BaseTest.CollectionName;
         });
         AssertSingletonMongoCache();
+        AssertNoCleanCacheJobs();
+    }
+
+    [Fact]
+    public void GivenMongoClient_WhenAddMongoCacheWithJobs_ThenAddSingleton()
+    {
+        var client = new MongoClient(_mongoDatabase.GetConnectionString());
+        _services.AddMongoCache(client, (options) =>
+        {
+            options.DatabaseName = BaseTest.DatabaseName;
+            options.CollectionName = BaseTest.CollectionName;
+            options.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
+            options.UseCleanCacheJobs = true;
+        });
+        AssertSingletonMongoCache();
+        AssertCleanCacheJobs();
     }
 
     private void AssertSingletonMongoCache()
@@ -76,5 +95,19 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
             (cache1 as MongoCache).Should().NotBeNull();
             cache1.Should().Be(cache2);
         }
+    }
+
+    private void AssertNoCleanCacheJobs()
+    {
+        var provider = _services.BuildServiceProvider();
+        var job = provider.GetService<IHostedService>();
+        (job as CleanCacheJobs).Should().BeNull();
+    }
+
+    private void AssertCleanCacheJobs()
+    {
+        var provider = _services.BuildServiceProvider();
+        var job = provider.GetRequiredService<IHostedService>();
+        (job as CleanCacheJobs).Should().NotBeNull();
     }
 }
