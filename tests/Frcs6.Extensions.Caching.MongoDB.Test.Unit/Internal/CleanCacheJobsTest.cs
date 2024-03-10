@@ -10,7 +10,7 @@ public class CleanCacheJobsTest : BaseTest
     public CleanCacheJobsTest()
     {
         _cacheItemRepository = Fixture.Freeze<Mock<ICacheItemRepository>>();
-        MongoCacheOptions.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
+        MongoCacheOptions.RemoveExpiredDelay = TimeSpan.FromSeconds(1);
         _sut = Fixture.Create<CleanCacheJobs>();
     }
 
