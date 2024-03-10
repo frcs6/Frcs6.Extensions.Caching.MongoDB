@@ -15,6 +15,7 @@ builder.Services.AddMongoCache(mongoDatabase.GetConnectionString(), options =>
     options.DatabaseName = "mongocache-examples";
     options.CollectionName = "mongocache-webapi";
     options.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
+    options.UseCleanCacheJobs = true;
 });
 
 var app = builder.Build();

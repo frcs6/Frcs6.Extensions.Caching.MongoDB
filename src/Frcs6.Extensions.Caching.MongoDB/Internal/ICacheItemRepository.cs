@@ -14,6 +14,6 @@ internal interface ICacheItemRepository : IDisposable
 
     void Remove(string key);
     Task RemoveAsync(string key, CancellationToken token);
-    void RemoveExpired();
+    void RemoveExpired(bool force = false);
     Task RemoveExpiredAsync(CancellationToken token);
 }

@@ -26,5 +26,10 @@ public sealed class MongoCacheOptions : IOptions<MongoCacheOptions>
     /// </summary>
     public TimeSpan? RemoveExpiredDelay { get; set; }
 
+    /// <summary>
+    /// Clean expired item(s) with a <see cref="IHostedService"/>.
+    /// </summary>
+    public bool UseCleanCacheJobs { get; set; }
+
     MongoCacheOptions IOptions<MongoCacheOptions>.Value => this;
 }
