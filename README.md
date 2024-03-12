@@ -73,5 +73,3 @@ builder.Services.AddMongoCache(settings, options =>
 Removing expired elements is automatic. The only option you have to set is ```RemoveExpiredDelay```.
 
 If ```RemoveExpiredDelay``` is not set, cleaning will launch on each cache access (Get, Set, Refresh).
-
-**TODO**: Add a [jobs](https://github.com/frcs6/Frcs6.Extensions.Caching.MongoDB/issues/38) to remove expired item.
