@@ -37,7 +37,7 @@ jobs:
       run: |
         dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
 
-    - name: Build solution with version
+    - name: Build solution
       run: |
         dotnet build Frcs6.Extensions.Caching.MongoDB.sln \
           -c Release \
