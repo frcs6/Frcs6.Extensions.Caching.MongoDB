@@ -5,7 +5,7 @@ on:
     branches: [ 'main' ]
     paths-ignore: [ '**.md' ]
   workflow_dispatch:
-    branches: [ 'main' ]
+    branches: [ '*' ]
 
 jobs:
   stryker_mutator:
