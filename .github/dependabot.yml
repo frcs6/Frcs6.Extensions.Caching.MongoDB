@@ -12,7 +12,3 @@ updates:
     target-branch: "main"
     labels:
       - "dependencies"
-    groups:
-      actions-deps:
-        patterns:
-          - "*"
