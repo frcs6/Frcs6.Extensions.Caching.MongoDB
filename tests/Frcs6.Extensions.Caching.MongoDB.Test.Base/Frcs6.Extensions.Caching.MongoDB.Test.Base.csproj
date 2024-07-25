@@ -15,6 +15,10 @@
   
   <ItemGroup Condition = "'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>  
+  
+  <ItemGroup Condition = "'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
   </ItemGroup>
 
   <ItemGroup>
