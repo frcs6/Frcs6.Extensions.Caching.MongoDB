@@ -35,6 +35,13 @@
     <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="8.7.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.2" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.0-preview.6.24327.7" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-preview.6.24327.7" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0-preview.6.24327.7" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.0.0-preview.6.24327.7" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.0-preview.6.24327.7" />
+  </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
