@@ -1,9 +1,5 @@
 ﻿namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-#if !NET8_0_OR_GREATER
-using TimeProvider = Microsoft.Extensions.Internal.ISystemClock;
-#endif
-
 internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
 {
     private static readonly ReplaceOptions DefaultReplaceOptions = new() { IsUpsert = true };
@@ -205,7 +201,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
 
     private static void ValidateOptions(MongoCacheOptions mongoCacheOptions)
     {
-        ArgumentThrowHelper.ThrowIfNullOrWhiteSpace(mongoCacheOptions.DatabaseName);
-        ArgumentThrowHelper.ThrowIfNullOrWhiteSpace(mongoCacheOptions.CollectionName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(mongoCacheOptions.DatabaseName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(mongoCacheOptions.CollectionName);
     }
 }

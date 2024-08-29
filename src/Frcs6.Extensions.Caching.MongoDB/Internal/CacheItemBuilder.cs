@@ -1,9 +1,5 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-#if !NET8_0_OR_GREATER
-using TimeProvider = Microsoft.Extensions.Internal.ISystemClock;
-#endif
-
 internal sealed class CacheItemBuilder : ICacheItemBuilder
 {
     private readonly TimeProvider _timeProvider;
@@ -90,7 +86,7 @@ internal sealed class CacheItemBuilder : ICacheItemBuilder
     {
         if (options.AbsoluteExpiration.HasValue)
         {
-            ArgumentThrowHelper.ThrowIfLessThanOrEqual(options.AbsoluteExpiration.Value, creationTime);
+            ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(options.AbsoluteExpiration.Value, creationTime);
         }
         if (options.AbsoluteExpirationRelativeToNow.HasValue)
         {
