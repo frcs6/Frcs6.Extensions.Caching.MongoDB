@@ -81,57 +81,57 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
 
-  # publish_release:
-  #   needs: build_and_test
-  #   runs-on: ubuntu-latest
+  publish_release:
+    needs: build_and_test
+    runs-on: ubuntu-latest
     
-  #   steps:
-  #   - name: Download artifact
-  #     uses: actions/download-artifact@v4.1.8
-  #     with:
-  #       path: artifact
-  #       pattern: Frcs6.Extensions.Caching.MongoDB
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4.1.8
+      with:
+        path: artifact
+        pattern: Frcs6.Extensions.Caching.MongoDB
 
-  #   - name: Release artifact
-  #     uses: ncipollo/release-action@v1.14.0
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     with:
-  #       allowUpdates: true
-  #       artifacts: "artifact/**/*.nupkg"
-  #       tag: v${{ needs.build_and_test.outputs.version }}
-  #       name: Release v${{ needs.build_and_test.outputs.version }}
-  #       draft: false
-  #       prerelease: false
+    - name: Release artifact
+      uses: ncipollo/release-action@v1.14.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        allowUpdates: true
+        artifacts: "artifact/**/*.nupkg"
+        tag: v${{ needs.build_and_test.outputs.version }}
+        name: Release v${{ needs.build_and_test.outputs.version }}
+        draft: false
+        prerelease: ${{ github.ref != 'refs/heads/main' }}
   
-  # publish_nuget:
-  #   needs: build_and_test
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       registry: [github, nuget_org]
-  #       include:
-  #         - registry: github
-  #           source: https://nuget.pkg.github.com/frcs6/index.json
-  #           api_key: GITHUB_TOKEN
-  #         - registry: nuget_org
-  #           source: https://api.nuget.org/v3/index.json
-  #           api_key: NUGET_API_KEY
+  publish_nuget:
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        registry: [github, nuget_org]
+        include:
+          - registry: github
+            source: https://nuget.pkg.github.com/frcs6/index.json
+            api_key: GITHUB_TOKEN
+          - registry: nuget_org
+            source: https://api.nuget.org/v3/index.json
+            api_key: NUGET_API_KEY
 
-  #   steps:
-  #   - name: Download artifact
-  #     uses: actions/download-artifact@v4.1.8
-  #     with:
-  #       path: artifact
-  #       pattern: Frcs6.Extensions.Caching.MongoDB
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4.1.8
+      with:
+        path: artifact
+        pattern: Frcs6.Extensions.Caching.MongoDB
 
-  #   - name: Setup DotNet
-  #     uses: actions/setup-dotnet@v4.0.1
-  #     with:
-  #       dotnet-version: 8.0.x
+    - name: Setup DotNet
+      uses: actions/setup-dotnet@v4.0.1
+      with:
+        dotnet-version: 8.0.x
 
-  #   - name: Push to NuGet to ${{ matrix.registry }}_registry
-  #     run: |
-  #       dotnet nuget push ./artifact/**/*.nupkg \
-  #         --source ${{ matrix.source }} \
-  #         --api-key ${{ secrets[matrix.api_key] }}
+    - name: Push to NuGet to ${{ matrix.registry }}_registry
+      run: |
+        dotnet nuget push ./artifact/**/*.nupkg \
+          --source ${{ matrix.source }} \
+          --api-key ${{ secrets[matrix.api_key] }}
