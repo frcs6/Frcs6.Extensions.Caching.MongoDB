@@ -10,17 +10,17 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v4.1.7
       with:
         fetch-depth: 0
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0
+      uses: gittools/actions/gitversion/setup@v3.0.0
       with:
         versionSpec: '5.x'
 
     - name: Compute version
-      uses: gittools/actions/gitversion/execute@v0
+      uses: gittools/actions/gitversion/execute@v3.0.0
       id: version
 
   pr_build_and_test:
@@ -31,10 +31,10 @@ jobs:
  
     steps:
     - name: Checkout
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v4.1.7
 
     - name: Setup DotNet
-      uses: actions/setup-dotnet@v4.0.0
+      uses: actions/setup-dotnet@v4.0.1
       with:
         dotnet-version: ${{ matrix.dotnet-version }}.x
 
@@ -56,8 +56,7 @@ jobs:
           -f net${{ matrix.dotnet-version }} \
           --no-build \
           /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=opencover \
-          /p:CoverletOutput=./codecov.yml
+          /p:CoverletOutputFormat=opencover
 
     - name: Build examples
       if: ${{ contains(matrix.dotnet-version, '8.0') }}
@@ -67,7 +66,7 @@ jobs:
           -f net${{ matrix.dotnet-version }}
 
     - name: Publish coverage to Codecov
-      uses: codecov/codecov-action@v4.0.1
+      uses: codecov/codecov-action@v4.5.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
