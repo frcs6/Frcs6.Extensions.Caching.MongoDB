@@ -8,7 +8,7 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest   
     outputs: 
-      version: ${{ steps.version.outputs.majorMinorPatch }}
+      version: ${{ steps.version.outputs.nuGetVersionV2 }}
  
     steps:
     - name: Checkout
@@ -42,10 +42,10 @@ jobs:
         dotnet build Frcs6.Extensions.Caching.MongoDB.sln \
           -c Release \
           --no-restore \
-          /p:Version=${{ steps.version.outputs.majorMinorPatch }} \
+          /p:Version=${{ steps.version.outputs.semVer }} \
           /p:AssemblyVersion=${{ steps.version.outputs.assemblySemVer }} \
           /p:FileVersion=${{ steps.version.outputs.assemblySemFileVer }} \
-          /p:InformationalVersion=${{ steps.version.outputs.Sha }}
+          /p:InformationalVersion=${{ steps.version.outputs.informationalVersion }}
 
     - name: Test solution
       run: |
