@@ -45,9 +45,7 @@ public static class MongoCachingServicesExtensions
 
         services.Add(ServiceDescriptor.Singleton<IDistributedCache, MongoCache>((serviceProvider) =>
         {
-            var mongoCacheOptions = serviceProvider.GetService<IOptions<MongoCacheOptions>>() ??
-                                    throw new InvalidOperationException("No MongoCache options found.");
-
+            var mongoCacheOptions = serviceProvider.GetMongoCacheOptions();
             return new MongoCache(
                 new CacheItemBuilder(DefaultTimeProvider(), mongoCacheOptions),
                 new CacheItemRepository(mongoClient, DefaultTimeProvider(), mongoCacheOptions)
@@ -61,9 +59,7 @@ public static class MongoCachingServicesExtensions
         {
             services.AddHostedService((serviceProvider) =>
             {
-                var mongoCacheOptions = serviceProvider.GetService<IOptions<MongoCacheOptions>>() ??
-                                        throw new InvalidOperationException("No MongoCache options found.");
-
+                var mongoCacheOptions = serviceProvider.GetMongoCacheOptions();
                 return new CleanCacheJobs(
                     new CacheItemRepository(mongoClient, DefaultTimeProvider(), mongoCacheOptions),
                     mongoCacheOptions);
@@ -72,6 +68,11 @@ public static class MongoCachingServicesExtensions
 
         return services;
     }
+
+    [ExcludeFromCodeCoverage]
+    private static IOptions<MongoCacheOptions> GetMongoCacheOptions(this IServiceProvider serviceProvider) =>
+        serviceProvider.GetService<IOptions<MongoCacheOptions>>() ??
+        throw new InvalidOperationException("No MongoCache options found.");
 
     private static TimeProvider DefaultTimeProvider() => TimeProvider.System;
 }
