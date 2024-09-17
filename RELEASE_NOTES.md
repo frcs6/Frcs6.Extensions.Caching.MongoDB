@@ -2,6 +2,7 @@
 
 ## 3.0
 
+- 3.1: Add dotnet 9.0
 - 3.0: Remove dotnet 6.0
 
 ## 2.0
