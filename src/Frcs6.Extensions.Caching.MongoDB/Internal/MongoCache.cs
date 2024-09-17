@@ -1,9 +1,5 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-#if !NET8_0_OR_GREATER
-using TimeProvider = Microsoft.Extensions.Internal.ISystemClock;
-#endif
-
 internal sealed class MongoCache : IDistributedCache
 {
     private readonly ICacheItemBuilder _cacheItemBuilder;

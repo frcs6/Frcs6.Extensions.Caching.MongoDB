@@ -1,10 +1,6 @@
 ﻿using Frcs6.Extensions.Caching.MongoDB.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
-#if !NET8_0_OR_GREATER
-using Microsoft.Extensions.Internal;
-#endif
-
 namespace Frcs6.Extensions.Caching.MongoDB;
 
 /// <summary>
@@ -77,9 +73,5 @@ public static class MongoCachingServicesExtensions
         return services;
     }
 
-#if NET8_0_OR_GREATER
     private static TimeProvider DefaultTimeProvider() => TimeProvider.System;
-#else
-    private static SystemClock DefaultTimeProvider() => new();
-#endif
 }
