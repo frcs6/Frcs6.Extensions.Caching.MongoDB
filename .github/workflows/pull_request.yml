@@ -61,13 +61,19 @@ jobs:
           /p:CollectCoverage=true \
           /p:CoverletOutputFormat=opencover
 
+    - name: Restore examples
+      if: ${{ contains(matrix.dotnet-version, '8.0') }}
+      run: | 
+        dotnet restore Frcs6.Extensions.Caching.MongoDB.Examples.sln \
+          -p:TargetFramework=net${{ matrix.dotnet-version }}
+
     - name: Build examples
       if: ${{ contains(matrix.dotnet-version, '8.0') }}
       run: | 
         dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln \
           -c Release \
           -f net${{ matrix.dotnet-version }} \
-          -p:TargetFramework=net${{ matrix.dotnet-version }}
+          --no-restore
 
     - name: Publish coverage to Codecov
       uses: codecov/codecov-action@v4.5.0
