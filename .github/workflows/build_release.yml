@@ -51,8 +51,7 @@ jobs:
           -c Release \
           --no-build \
           /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=opencover \
-          /p:CoverletOutput=./codecov.yml
+          /p:CoverletOutputFormat=opencover
 
     - name: Build examples
       run: |
