@@ -30,6 +30,7 @@ internal sealed class CleanCacheJobs : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
+    [ExcludeFromCodeCoverage]
     public void Dispose()
         => _timer.Dispose();
 

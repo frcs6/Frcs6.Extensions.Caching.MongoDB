@@ -2,7 +2,7 @@ name: 'Pull requests'
 
 on:
   pull_request:
-    branches: [ 'main' ]
+    branches: [ 'main', 'releases/*' ]
 
 jobs:
   pr_build_and_test:
