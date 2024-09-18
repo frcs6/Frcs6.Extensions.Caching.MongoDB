@@ -1,4 +1,6 @@
-﻿namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit.Internal;
+﻿using Microsoft.Extensions.Options;
+
+namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit.Internal;
 
 public class CacheItemRepositoryTest : BaseTest
 {
@@ -17,6 +19,18 @@ public class CacheItemRepositoryTest : BaseTest
         _sut = Fixture.Create<CacheItemRepository>();
     }
 
+    [Theory]
+    [InlineData("", "CollectionName")]
+    [InlineData(null, "CollectionName")]
+    [InlineData("DatabaseName", "")]
+    [InlineData("DatabaseName", null)]
+    public void GivenNoDatabaseParams_WhenCtor_ThenArgumentException(string? databaseName, string? collectionName)
+    {
+        var mongoCacheOptions = new MongoCacheOptions { DatabaseName = databaseName, CollectionName = collectionName};
+        var act = () => new CacheItemRepository(_mongoClient.Object, TimeProvider, Options.Create(mongoCacheOptions));
+        act.Should().Throw<ArgumentException>();
+    }
+
     [Fact]
     public void Given_WhenCtor_ThenAddTwoIndex()
     {
@@ -31,10 +45,10 @@ public class CacheItemRepositoryTest : BaseTest
     }
 
     [Fact]
-    public void GivenNullKey_WhenReadAsync_ThenArgumentNullException()
+    public async Task GivenNullKey_WhenReadAsync_ThenArgumentNullException()
     {
         var act = () => _sut.ReadAsync(null!, default);
-        act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -45,10 +59,10 @@ public class CacheItemRepositoryTest : BaseTest
     }
 
     [Fact]
-    public void GivenNullKey_WhenReadPartialAsync_ThenArgumentNullException()
+    public async Task GivenNullKey_WhenReadPartialAsync_ThenArgumentNullException()
     {
         var act = () => _sut.ReadPartialAsync(null!, default);
-        act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -59,10 +73,10 @@ public class CacheItemRepositoryTest : BaseTest
     }
 
     [Fact]
-    public void GivenNullCacheItem_WhenWriteAsync_ThenArgumentNullException()
+    public async Task GivenNullCacheItem_WhenWriteAsync_ThenArgumentNullException()
     {
         var act = () => _sut.WriteAsync(null!, default);
-        act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -73,10 +87,10 @@ public class CacheItemRepositoryTest : BaseTest
     }
 
     [Fact]
-    public void GivenNullCacheItem_WhenWritePartialAsync_ThenArgumentNullException()
+    public async Task GivenNullCacheItem_WhenWritePartialAsync_ThenArgumentNullException()
     {
         var act = () => _sut.WritePartialAsync(null!, default);
-        act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -87,9 +101,9 @@ public class CacheItemRepositoryTest : BaseTest
     }
 
     [Fact]
-    public void GivenNullKey_WhenRemoveAsync_ThenArgumentNullException()
+    public async Task GivenNullKey_WhenRemoveAsync_ThenArgumentNullException()
     {
         var act = () => _sut.RemoveAsync(null!, default);
-        act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 }

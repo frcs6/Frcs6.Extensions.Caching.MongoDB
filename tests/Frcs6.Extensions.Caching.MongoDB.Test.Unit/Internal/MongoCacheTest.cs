@@ -73,10 +73,10 @@ public partial class MongoCacheTest : BaseTest
     }
 
     [Fact]
-    public void GivenNullKey_WhenGetAsync_ThenArgumentNullException()
+    public async Task GivenNullKey_WhenGetAsync_ThenArgumentNullException()
     {
         var act = () => _sut.GetAsync(null!);
-        act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -171,10 +171,10 @@ public partial class MongoCacheTest : BaseTest
     [InlineData(true, false, false)]
     [InlineData(false, true, false)]
     [InlineData(false, false, true)]
-    public void GivenNullArguments_WhenSetAsync_ThenArgumentNullException(
-    bool keyIsNull,
-    bool valueIsNull,
-    bool optionsIsNull)
+    public async Task GivenNullArguments_WhenSetAsync_ThenArgumentNullException(
+        bool keyIsNull,
+        bool valueIsNull,
+        bool optionsIsNull)
     {
         var key = keyIsNull ? null : DefaultKey;
         var value = valueIsNull ? null : DefaultValue;
@@ -182,7 +182,7 @@ public partial class MongoCacheTest : BaseTest
 
         var act = () => _sut.SetAsync(key!, value!, options!);
 
-        act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -246,10 +246,10 @@ public partial class MongoCacheTest : BaseTest
     }
 
     [Fact]
-    public void GivenNullKey_WhenRefreshAsync_ThenArgumentNullException()
+    public async Task GivenNullKey_WhenRefreshAsync_ThenArgumentNullException()
     {
         var act = () => _sut.RefreshAsync(null!);
-        act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -305,10 +305,10 @@ public partial class MongoCacheTest : BaseTest
     }
 
     [Fact]
-    public void GivenNullKey_WhenRemoveAsync_ThenArgumentNullException()
+    public async Task GivenNullKey_WhenRemoveAsync_ThenArgumentNullException()
     {
         var act = () => _sut.RemoveAsync(null!);
-        act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
