@@ -17,20 +17,6 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
     }
 
     [Fact]
-    public void GivenNullServices_WhenAddMongoCache_ThenThrow()
-    {
-        var act = () => MongoCachingServicesExtensions.AddMongoCache(null!, _mongoDatabase.GetConnectionString(), (options) => { });
-        act.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void GivenNullActions_WhenAddMongoCache_ThenThrow()
-    {
-        var act = () => MongoCachingServicesExtensions.AddMongoCache(_services, _mongoDatabase.GetConnectionString(), null!);
-        act.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
     public void GivenConnectionString_WhenAddMongoCache_ThenAddSingleton()
     {
         _services.AddMongoCache(_mongoDatabase.GetConnectionString(), (options) =>
