@@ -255,4 +255,27 @@ public class CacheItemBuilderTest : BaseTest
             result.Should().BeTrue();
         }
     }
+
+    [Fact]
+    public void GivenAbsoluteExpirationEqualSlidingExpiration_WhenRefresh_ThenUpdateAndReturnTrue()
+    {
+        var slidingExpiration = TimeSpan.FromMinutes(10);
+        var absoluteExpiration = UtcNow.Add(slidingExpiration);
+        var expected = new CacheItem()
+            .SetSlidingExpiration(slidingExpiration)
+            .SetAbsoluteExpiration(absoluteExpiration)
+            .SetExpireAt(UtcNow + slidingExpiration);
+
+        var cacheItem = new CacheItem()
+            .SetSlidingExpiration(slidingExpiration)
+            .SetAbsoluteExpiration(absoluteExpiration);
+
+        var result = _sut.Refresh(cacheItem);
+
+        using (new AssertionScope())
+        {
+            cacheItem.Should().BeEquivalentTo(expected);
+            result.Should().BeTrue();
+        }
+    }
 }

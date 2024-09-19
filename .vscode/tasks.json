@@ -16,10 +16,7 @@
             "type": "process",
             "args": [
                 "test",
-                "tests/Frcs6.Extensions.Caching.MongoDB.Test.Unit",
-                "/p:CollectCoverage=true",
-                "/p:CoverletOutputFormat=lcov",
-                "/p:CoverletOutput=${workspaceFolder}/TestResult/lcov.info"
+                "tests/Frcs6.Extensions.Caching.MongoDB.Test.Unit"                
             ],
             "group": {
                 "kind": "test"
@@ -31,10 +28,7 @@
             "type": "process",
             "args": [
                 "test",
-                "tests/Frcs6.Extensions.Caching.MongoDB.Test.Integrated",
-                "/p:CollectCoverage=true",
-                "/p:CoverletOutputFormat=lcov",
-                "/p:CoverletOutput=${workspaceFolder}/TestResult/lcov.info",
+                "tests/Frcs6.Extensions.Caching.MongoDB.Test.Integrated"                
             ],
             "group": {
                 "kind": "test"

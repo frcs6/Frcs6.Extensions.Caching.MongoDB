@@ -2,32 +2,15 @@ name: 'Pull requests'
 
 on:
   pull_request:
-    branches: [ 'main' ]
+    branches: [ 'main', 'releases/*' ]
 
 jobs:
-  pr_preview_next_version:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4.1.7
-      with:
-        fetch-depth: 0
-
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3.0.0
-      with:
-        versionSpec: '5.x'
-
-    - name: Compute version
-      uses: gittools/actions/gitversion/execute@v3.0.0
-      id: version
-
   pr_build_and_test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        dotnet-version: ['8.0']
+        dotnet-version: ['8.0', '9.0']
  
     steps:
     - name: Checkout
@@ -37,10 +20,12 @@ jobs:
       uses: actions/setup-dotnet@v4.0.1
       with:
         dotnet-version: ${{ matrix.dotnet-version }}.x
+        dotnet-quality: 'preview'
 
     - name: Restore solution
       run: |
-        dotnet restore Frcs6.Extensions.Caching.MongoDB.sln
+        dotnet restore Frcs6.Extensions.Caching.MongoDB.sln \
+          -p:TargetFramework=net${{ matrix.dotnet-version }}
 
     - name: Build solution
       run: |
@@ -58,12 +43,19 @@ jobs:
           /p:CollectCoverage=true \
           /p:CoverletOutputFormat=opencover
 
+    - name: Restore examples
+      if: ${{ contains(matrix.dotnet-version, '8.0') }}
+      run: | 
+        dotnet restore Frcs6.Extensions.Caching.MongoDB.Examples.sln \
+          -p:TargetFramework=net${{ matrix.dotnet-version }}
+
     - name: Build examples
       if: ${{ contains(matrix.dotnet-version, '8.0') }}
       run: | 
         dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln \
           -c Release \
-          -f net${{ matrix.dotnet-version }}
+          -f net${{ matrix.dotnet-version }} \
+          --no-restore
 
     - name: Publish coverage to Codecov
       uses: codecov/codecov-action@v4.5.0
