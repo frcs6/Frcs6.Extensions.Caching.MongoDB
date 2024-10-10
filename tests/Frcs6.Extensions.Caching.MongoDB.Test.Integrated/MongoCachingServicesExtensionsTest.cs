@@ -24,6 +24,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
             options.DatabaseName = BaseTest.DatabaseName;
             options.CollectionName = BaseTest.CollectionName;
         });
+        _services.Count.Should().Be(7);
         AssertSingletonMongoCache();
         AssertNoCleanCacheJobs();
     }
@@ -37,6 +38,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
             options.DatabaseName = BaseTest.DatabaseName;
             options.CollectionName = BaseTest.CollectionName;
         });
+        _services.Count.Should().Be(7);
         AssertSingletonMongoCache();
         AssertNoCleanCacheJobs();
     }
@@ -50,6 +52,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
             options.DatabaseName = BaseTest.DatabaseName;
             options.CollectionName = BaseTest.CollectionName;
         });
+        _services.Count.Should().Be(7);
         AssertSingletonMongoCache();
         AssertNoCleanCacheJobs();
     }
@@ -65,6 +68,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
             options.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
             options.UseCleanCacheJobs = true;
         });
+        _services.Count.Should().Be(8);
         AssertSingletonMongoCache();
         AssertCleanCacheJobs();
     }

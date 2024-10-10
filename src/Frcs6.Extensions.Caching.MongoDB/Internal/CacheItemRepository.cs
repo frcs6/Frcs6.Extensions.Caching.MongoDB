@@ -27,7 +27,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
     public void Dispose()
         => _lockNextRemoveExpired.Dispose();
 
-    public CacheItem Read(string key)
+    public CacheItem? Read(string key)
     {
         ArgumentNullException.ThrowIfNull(key);
         return _cacheItemCollection
@@ -35,7 +35,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
             .SingleOrDefault();
     }
 
-    public async Task<CacheItem> ReadAsync(string key, CancellationToken token)
+    public async Task<CacheItem?> ReadAsync(string key, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(key);
         return await _cacheItemCollection
@@ -44,7 +44,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
             .ConfigureAwait(false);
     }
 
-    public CacheItem ReadPartial(string key)
+    public CacheItem? ReadPartial(string key)
     {
         ArgumentNullException.ThrowIfNull(key);
         return _cacheItemCollection
@@ -53,7 +53,7 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
             .SingleOrDefault();
     }
 
-    public async Task<CacheItem> ReadPartialAsync(string key, CancellationToken token)
+    public async Task<CacheItem?> ReadPartialAsync(string key, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(key);
         return await _cacheItemCollection

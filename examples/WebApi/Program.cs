@@ -46,6 +46,8 @@ app.MapGet("/generate", (IDistributedCache cache) =>
 
 app.Run();
 
+mongoDatabase.Dispose();
+
 record GeneratedGuid(bool FromCache, string Value)
 {
 }
