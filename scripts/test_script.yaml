@@ -1,0 +1,18 @@
+config:
+  target: 'http://host.docker.internal:5226'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Loading phase"
+    - duration: 120
+      arrivalRate: 1000
+      name: "Maximum load phase"
+scenarios:
+  - flow:
+      - get:
+          url: "/generate"
+          capture:
+            - json: "$.key"
+              as: "key"
+      - get:
+          url: "/{{ key }}"
