@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./WebApi
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      
+  loadtest:
+    image: artilleryio/artillery:latest
+    volumes:
+      - .:/scripts
+    entrypoint: ["artillery", "run", "/scripts/test_script.yaml"]
+    depends_on:
+      - app

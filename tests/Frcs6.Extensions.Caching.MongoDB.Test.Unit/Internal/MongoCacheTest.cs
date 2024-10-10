@@ -4,6 +4,7 @@ public partial class MongoCacheTest : BaseTest
 {
     private readonly DistributedCacheEntryOptions _options;
     private readonly CacheItem _cacheItem;
+    private readonly CacheItem _cacheItemNullValue;
     private readonly Mock<ICacheItemBuilder> _cacheItemBuilder = new();
     private readonly Mock<ICacheItemRepository> _cacheItemRepository = new();
     private readonly MongoCache _sut;
@@ -12,6 +13,7 @@ public partial class MongoCacheTest : BaseTest
     {
         _options = Fixture.Create<DistributedCacheEntryOptions>();
         _cacheItem = new CacheItem { Value = DefaultValue };
+        _cacheItemNullValue = new CacheItem { Value = null };
         _cacheItemBuilder = Fixture.Freeze<Mock<ICacheItemBuilder>>();
         _cacheItemRepository = Fixture.Freeze<Mock<ICacheItemRepository>>();
         _sut = Fixture.Create<MongoCache>();
@@ -73,6 +75,14 @@ public partial class MongoCacheTest : BaseTest
     }
 
     [Fact]
+    public void GivenKey_WhenGet_ThenReturnNullValue()
+    {
+        _cacheItemRepository.Setup(r => r.Read(DefaultKey)).Returns(_cacheItemNullValue);
+        var result = _sut.Get(DefaultKey);
+        result.Should().BeNull();
+    }
+
+    [Fact]
     public async Task GivenNullKey_WhenGetAsync_ThenArgumentNullException()
     {
         var act = () => _sut.GetAsync(null!);
@@ -125,6 +135,14 @@ public partial class MongoCacheTest : BaseTest
         _cacheItemRepository.Setup(r => r.ReadAsync(DefaultKey, DefaultToken)).ReturnsAsync(_cacheItem);
         var result = await _sut.GetAsync(DefaultKey, DefaultToken);
         result.Should().BeEquivalentTo(DefaultValue);
+    }
+
+    [Fact]
+    public async Task GivenKey_WhenGetAsync_ThenReturnValueNullValue()
+    {
+        _cacheItemRepository.Setup(r => r.ReadAsync(DefaultKey, DefaultToken)).ReturnsAsync(_cacheItemNullValue);
+        var result = await _sut.GetAsync(DefaultKey, DefaultToken);
+        result.Should().BeNull();
     }
 
     [Theory]

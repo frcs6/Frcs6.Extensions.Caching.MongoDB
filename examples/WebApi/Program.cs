@@ -31,21 +31,31 @@ app.UseHttpsRedirection();
 
 app.MapGet("/generate", (IDistributedCache cache) =>
 {
-    const string key = "key";
+    string key = Guid.NewGuid().ToString();
     var value = cache.GetString(key);
     if (value == null)
     {
         value = Guid.NewGuid().ToString();
-        cache.SetString(key, value, new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromSeconds(10) });
-        return new GeneratedGuid(false, value!);
+        cache.SetString(key, value, new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromSeconds(60) });
+        return new CacheData(false, key, value!);
     }
-    return new GeneratedGuid(true, value!);
+    return new CacheData(true, key, value!);
 })
-.WithName("GenerateGuidWithCache")
+.WithName("Generate")
+.WithOpenApi();
+
+app.MapGet("/{key}", (string key, IDistributedCache cache) =>
+{
+    var value = cache.GetString(key);
+    return new CacheData(value != null, key, value!);
+})
+.WithName("GetByKey")
 .WithOpenApi();
 
 app.Run();
 
-record GeneratedGuid(bool FromCache, string Value)
+mongoDatabase.Dispose();
+
+record CacheData(bool FromCache, string Key, string Value)
 {
 }

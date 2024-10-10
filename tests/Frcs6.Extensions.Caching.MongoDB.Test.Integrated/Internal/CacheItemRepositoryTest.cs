@@ -77,7 +77,9 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         result = sut.ReadPartial(cacheItem.Key!);
         using (new AssertionScope())
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             result.Value.Should().BeNull();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             result.Should().BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
         }
     }
@@ -95,7 +97,9 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         result = await sut.ReadPartialAsync(cacheItem.Key!, default);
         using (new AssertionScope())
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             result.Value.Should().BeNull();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             result.Should().BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
         }
     }

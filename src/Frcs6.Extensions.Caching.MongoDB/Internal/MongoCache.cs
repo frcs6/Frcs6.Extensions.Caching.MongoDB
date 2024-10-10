@@ -14,28 +14,15 @@ internal sealed class MongoCache : IDistributedCache
     }
 
     public byte[]? Get(string key)
-    {
-        ArgumentNullException.ThrowIfNull(key);
-        return GetAndRefresh(key, true);
-    }
-
+        => GetAndRefresh(key, true);
     public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
-    {
-        ArgumentNullException.ThrowIfNull(key);
-        return await GetAndRefreshAsync(key, true, token).ConfigureAwait(false);
-    }
+        => await GetAndRefreshAsync(key, true, token).ConfigureAwait(false);
 
     public void Refresh(string key)
-    {
-        ArgumentNullException.ThrowIfNull(key);
-        GetAndRefresh(key, false);
-    }
+        => GetAndRefresh(key, false);
 
     public async Task RefreshAsync(string key, CancellationToken token = default)
-    {
-        ArgumentNullException.ThrowIfNull(key);
-        await GetAndRefreshAsync(key, false, token).ConfigureAwait(false);
-    }
+        => await GetAndRefreshAsync(key, false, token).ConfigureAwait(false);
 
     public void Remove(string key)
     {
