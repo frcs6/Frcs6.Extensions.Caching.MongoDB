@@ -17,16 +17,19 @@ public abstract class BaseTest
     protected string DefaultKey { get; }
     protected byte[] DefaultValue { get; }
     protected CancellationToken DefaultToken { get; } = CancellationToken.None;
-    protected DateTimeOffset UtcNow => _utcNow;
+    protected DateTimeOffset UtcNow { get; private set; }
 
-    protected MongoCacheOptions MongoCacheOptions { get; } = new()
-        { DatabaseName = DatabaseName, CollectionName = CollectionName, AllowNoExpiration = true };
+    private MongoCacheOptions MongoCacheOptions { get; } = new()
+    {
+        DatabaseName = DatabaseName,
+        CollectionName = CollectionName,
+        AllowNoExpiration = true
+    };
 
     private readonly FakeTimeProvider _timeProvider = new();
     protected TimeProvider TimeProvider => _timeProvider;
 
     private Fixture? _fixture;
-    private DateTimeOffset _utcNow;
 
     protected BaseTest()
     {
@@ -39,7 +42,7 @@ public abstract class BaseTest
 
     protected void ConfigureUtcNow(DateTimeOffset utcNow)
     {
-        _utcNow = utcNow;
+        UtcNow = utcNow;
         _timeProvider.SetUtcNow(utcNow);
     }
 
