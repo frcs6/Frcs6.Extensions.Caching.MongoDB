@@ -11,7 +11,8 @@ internal sealed class CleanCacheJobs : IHostedService, IDisposable
 
     public CleanCacheJobs(ICacheItemRepository cacheItemRepository, IOptions<MongoCacheOptions> mongoCacheOptions)
     {
-        ArgumentNullException.ThrowIfNull(mongoCacheOptions.Value.RemoveExpiredDelay);
+        if (!mongoCacheOptions.Value.RemoveExpiredDelay.HasValue)
+            throw new ArgumentNullException(nameof(mongoCacheOptions));
 
         _cacheItemRepository = cacheItemRepository;
         _removeExpiredDelay = mongoCacheOptions.Value.RemoveExpiredDelay.Value;

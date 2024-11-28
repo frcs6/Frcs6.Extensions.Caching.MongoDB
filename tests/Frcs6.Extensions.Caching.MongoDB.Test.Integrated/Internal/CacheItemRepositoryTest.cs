@@ -1,17 +1,21 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated.Internal;
 
-public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest>
+public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest>, IDisposable
 {
     private readonly MongoClient _mongoClient;
     private readonly IMongoCollection<CacheItem> _cacheItemCollection;
 
     public CacheItemRepositoryTest(MongoDatabaseTest mongoDatabase)
     {
-#pragma warning disable CA1062 // Validate arguments of public methods
+        ArgumentNullException.ThrowIfNull(mongoDatabase);
         _mongoClient = new MongoClient(mongoDatabase.GetConnectionString());
-#pragma warning restore CA1062 // Validate arguments of public methods
         Fixture.Register<IMongoClient>(() => _mongoClient);
         _cacheItemCollection = _mongoClient.GetDatabase(DatabaseName).GetCollection<CacheItem>(CollectionName);
+    }
+
+    public void Dispose()
+    {
+        _mongoClient.Dispose();
     }
 
     [Fact]
@@ -80,7 +84,9 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             result.Value.Should().BeNull();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-            result.Should().BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
+            result
+                .Should()
+                .BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
         }
     }
 
@@ -100,7 +106,9 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             result.Value.Should().BeNull();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-            result.Should().BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
+            result
+                .Should()
+                .BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
         }
     }
 
@@ -218,8 +226,10 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 
         using (new AssertionScope())
         {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+            cacheItems.ForEach(
+                c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 =>
+                _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
@@ -228,14 +238,16 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     {
         using var sut = GetSut(TimeSpan.FromHours(2));
         sut.RemoveExpired();
-        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+        var (cacheItems, expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         sut.RemoveExpired();
 
         using (new AssertionScope())
         {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            cacheItems.ForEach(
+                c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 =>
+                _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
         }
     }
 
@@ -245,14 +257,16 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         using var sut = GetSut(TimeSpan.FromHours(2));
         sut.RemoveExpired();
         ConfigureUtcNow(UtcNow.AddHours(3));
-        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+        var (cacheItems, expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         sut.RemoveExpired();
 
         using (new AssertionScope())
         {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+            cacheItems.ForEach(
+                c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 =>
+                _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
@@ -261,14 +275,16 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     {
         using var sut = GetSut(TimeSpan.FromHours(2));
         sut.RemoveExpired();
-        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+        var (cacheItems, expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         sut.RemoveExpired(true);
 
         using (new AssertionScope())
         {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+            cacheItems.ForEach(
+                c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 =>
+                _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
@@ -276,14 +292,16 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     public async Task GivenCacheItem_WhenRemoveExpiredAsync_ThenRemoveCollection()
     {
         using var sut = GetSut();
-        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+        var (cacheItems, expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         await sut.RemoveExpiredAsync(default);
 
         using (new AssertionScope())
         {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+            cacheItems.ForEach(
+                c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 =>
+                _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 
@@ -292,14 +310,16 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     {
         using var sut = GetSut(TimeSpan.FromHours(2));
         await sut.RemoveExpiredAsync(default);
-        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+        var (cacheItems, expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         await sut.RemoveExpiredAsync(default);
 
         using (new AssertionScope())
         {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            cacheItems.ForEach(
+                c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 =>
+                _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
         }
     }
 
@@ -309,14 +329,16 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         using var sut = GetSut(TimeSpan.FromHours(2));
         await sut.RemoveExpiredAsync(default);
         ConfigureUtcNow(UtcNow.AddHours(3));
-        (var cacheItems, var expiredCacheItems) = ArrangeCollectionWithExpiredItem();
+        var (cacheItems, expiredCacheItems) = ArrangeCollectionWithExpiredItem();
 
         await sut.RemoveExpiredAsync(default);
 
         using (new AssertionScope())
         {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
+            cacheItems.ForEach(
+                c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(1));
+            expiredCacheItems.ForEach(c1 =>
+                _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key, default).Should().Be(0));
         }
     }
 

@@ -1,20 +1,11 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
-internal sealed class MongoCache : IDistributedCache
+internal sealed class MongoCache(ICacheItemBuilder cacheItemBuilder, ICacheItemRepository cacheItemRepository)
+    : IDistributedCache
 {
-    private readonly ICacheItemBuilder _cacheItemBuilder;
-    private readonly ICacheItemRepository _cacheItemRepository;
-
-#pragma warning disable IDE0290 // Use primary constructor
-    public MongoCache(ICacheItemBuilder cacheItemBuilder, ICacheItemRepository cacheItemRepository)
-#pragma warning restore IDE0290 // Use primary constructor
-    {
-        _cacheItemBuilder = cacheItemBuilder;
-        _cacheItemRepository = cacheItemRepository;
-    }
-
     public byte[]? Get(string key)
         => GetAndRefresh(key, true);
+
     public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         => await GetAndRefreshAsync(key, true, token).ConfigureAwait(false);
 
@@ -28,14 +19,14 @@ internal sealed class MongoCache : IDistributedCache
     {
         ArgumentNullException.ThrowIfNull(key);
         CleanExpired();
-        _cacheItemRepository.Remove(key);
+        cacheItemRepository.Remove(key);
     }
 
     public async Task RemoveAsync(string key, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(key);
         await CleanExpiredAsync(token).ConfigureAwait(false);
-        await _cacheItemRepository.RemoveAsync(key, token).ConfigureAwait(false);
+        await cacheItemRepository.RemoveAsync(key, token).ConfigureAwait(false);
     }
 
     public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
@@ -45,19 +36,20 @@ internal sealed class MongoCache : IDistributedCache
         ArgumentNullException.ThrowIfNull(options);
 
         CleanExpired();
-        var cacheItem = _cacheItemBuilder.Build(key, value, options);
-        _cacheItemRepository.Write(cacheItem);
+        var cacheItem = cacheItemBuilder.Build(key, value, options);
+        cacheItemRepository.Write(cacheItem);
     }
 
-    public async Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
+    public async Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options,
+        CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(value);
         ArgumentNullException.ThrowIfNull(options);
 
         await CleanExpiredAsync(token).ConfigureAwait(false);
-        var cacheItem = _cacheItemBuilder.Build(key, value, options);
-        await _cacheItemRepository.WriteAsync(cacheItem, token).ConfigureAwait(false);
+        var cacheItem = cacheItemBuilder.Build(key, value, options);
+        await cacheItemRepository.WriteAsync(cacheItem, token).ConfigureAwait(false);
     }
 
     private byte[]? GetAndRefresh(string key, bool withData)
@@ -66,15 +58,13 @@ internal sealed class MongoCache : IDistributedCache
 
         CleanExpired();
 
-        var cacheItem = withData ?
-            _cacheItemRepository.Read(key) :
-            _cacheItemRepository.ReadPartial(key);
+        var cacheItem = withData ? cacheItemRepository.Read(key) : cacheItemRepository.ReadPartial(key);
 
         if (cacheItem == null) return null;
 
-        if (_cacheItemBuilder.Refresh(cacheItem))
+        if (cacheItemBuilder.Refresh(cacheItem))
         {
-            _cacheItemRepository.WritePartial(cacheItem);
+            cacheItemRepository.WritePartial(cacheItem);
         }
 
         return cacheItem.Value?.ToArray() ?? null;
@@ -86,23 +76,24 @@ internal sealed class MongoCache : IDistributedCache
 
         await CleanExpiredAsync(token).ConfigureAwait(false);
 
-        var cacheItem = await (withData ?
-            _cacheItemRepository.ReadAsync(key, token) :
-            _cacheItemRepository.ReadPartialAsync(key, token)).ConfigureAwait(false);
+        var cacheItem =
+            await (withData
+                ? cacheItemRepository.ReadAsync(key, token)
+                : cacheItemRepository.ReadPartialAsync(key, token)).ConfigureAwait(false);
 
         if (cacheItem == null) return null;
 
-        if (_cacheItemBuilder.Refresh(cacheItem))
+        if (cacheItemBuilder.Refresh(cacheItem))
         {
-            await _cacheItemRepository.WritePartialAsync(cacheItem, token).ConfigureAwait(false);
+            await cacheItemRepository.WritePartialAsync(cacheItem, token).ConfigureAwait(false);
         }
 
         return cacheItem.Value?.ToArray() ?? null;
     }
 
     private void CleanExpired()
-        => _cacheItemRepository.RemoveExpired();
+        => cacheItemRepository.RemoveExpired();
 
     private async Task CleanExpiredAsync(CancellationToken token)
-        => await _cacheItemRepository.RemoveExpiredAsync(token).ConfigureAwait(false);
+        => await cacheItemRepository.RemoveExpiredAsync(token).ConfigureAwait(false);
 }

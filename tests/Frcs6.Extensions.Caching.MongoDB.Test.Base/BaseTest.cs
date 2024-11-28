@@ -18,10 +18,12 @@ public abstract class BaseTest
     protected byte[] DefaultValue { get; }
     protected CancellationToken DefaultToken { get; } = CancellationToken.None;
     protected DateTimeOffset UtcNow => _utcNow;
-    protected MongoCacheOptions MongoCacheOptions { get; } = new() { DatabaseName = DatabaseName, CollectionName = CollectionName, AllowNoExpiration = true };
+
+    protected MongoCacheOptions MongoCacheOptions { get; } = new()
+        { DatabaseName = DatabaseName, CollectionName = CollectionName, AllowNoExpiration = true };
 
     private readonly FakeTimeProvider _timeProvider = new();
-    protected TimeProvider TimeProvider => _timeProvider ;
+    protected TimeProvider TimeProvider => _timeProvider;
 
     private Fixture? _fixture;
     private DateTimeOffset _utcNow;

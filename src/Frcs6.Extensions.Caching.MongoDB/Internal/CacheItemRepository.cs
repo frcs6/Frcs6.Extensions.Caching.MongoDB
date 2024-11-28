@@ -1,6 +1,8 @@
-﻿namespace Frcs6.Extensions.Caching.MongoDB.Internal;
+﻿using System.Runtime.CompilerServices;
 
-internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
+namespace Frcs6.Extensions.Caching.MongoDB.Internal;
+
+internal sealed class CacheItemRepository : ICacheItemRepository
 {
     private static readonly ReplaceOptions DefaultReplaceOptions = new() { IsUpsert = true };
     private static readonly UpdateOptions DefaultUpdateOptions = new() { IsUpsert = false };
@@ -117,13 +119,9 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
 
     public void RemoveExpired(bool force = false)
     {
-#pragma warning disable IDE0039 // Use local function
-        var removeExpired = () => _cacheItemCollection.DeleteMany(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks));
-#pragma warning restore IDE0039 // Use local function
-
-        if(force)
+        if (force)
         {
-            removeExpired();
+            DoRemoveExpired();
             return;
         }
 
@@ -132,14 +130,14 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
         {
             if (!_removeExpiredDelay.HasValue)
             {
-                removeExpired();
+                DoRemoveExpired();
             }
             else
             {
                 var utcNow = _timeProvider.GetUtcNow();
                 if (!_nextRemoveExpired.HasValue || utcNow >= _nextRemoveExpired.Value)
                 {
-                    removeExpired();
+                    DoRemoveExpired();
                     _nextRemoveExpired = utcNow.Add(_removeExpiredDelay.Value);
                 }
             }
@@ -150,25 +148,25 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
         }
     }
 
+    private void DoRemoveExpired() =>
+        _cacheItemCollection.DeleteMany(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt,
+            _timeProvider.GetUtcNow().Ticks));
+
     public async Task RemoveExpiredAsync(CancellationToken token)
     {
-#pragma warning disable IDE0039 // Use local function
-        var removeExpiredAsync = () => _cacheItemCollection.DeleteManyAsync(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks), token).ConfigureAwait(false);
-#pragma warning restore IDE0039 // Use local function
-
         await _lockNextRemoveExpired.WaitAsync(token).ConfigureAwait(false);
         try
         {
             if (!_removeExpiredDelay.HasValue)
             {
-                await removeExpiredAsync();
+                await DoRemoveExpiredAsync(token);
             }
             else
             {
                 var utcNow = _timeProvider.GetUtcNow();
                 if (!_nextRemoveExpired.HasValue || utcNow >= _nextRemoveExpired.Value)
                 {
-                    await removeExpiredAsync();
+                    await DoRemoveExpiredAsync(token);
                     _nextRemoveExpired = utcNow.Add(_removeExpiredDelay.Value);
                 }
             }
@@ -178,6 +176,11 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
             _lockNextRemoveExpired.Release();
         }
     }
+
+    private ConfiguredTaskAwaitable<DeleteResult> DoRemoveExpiredAsync(CancellationToken token) =>
+        _cacheItemCollection
+            .DeleteManyAsync(Builders<CacheItem>.Filter.Lt(i => i.ExpireAt, _timeProvider.GetUtcNow().Ticks), token)
+            .ConfigureAwait(false);
 
 
     private void InitializeIndex()
@@ -192,9 +195,11 @@ internal sealed class CacheItemRepository : ICacheItemRepository, IDisposable
     }
 
     private static FilterDefinition<CacheItem> FindByKey(string key)
-         => Builders<CacheItem>.Filter.Eq(i => i.Key, key);
+        => Builders<CacheItem>.Filter.Eq(i => i.Key, key);
 
-    private static IMongoCollection<CacheItem> GetCollection(IMongoClient mongoClient, MongoCacheOptions mongoCacheOptions)
+    private static IMongoCollection<CacheItem> GetCollection(
+        IMongoClient mongoClient,
+        MongoCacheOptions mongoCacheOptions)
         => mongoClient
             .GetDatabase(mongoCacheOptions.DatabaseName)
             .GetCollection<CacheItem>(mongoCacheOptions.CollectionName);

@@ -3,7 +3,9 @@
 internal static class CacheItemExtension
 {
     public static DateTimeOffset? GetAbsoluteExpiration(this CacheItem cacheItem)
-        => cacheItem.AbsoluteExpiration.HasValue ? new DateTimeOffset(cacheItem.AbsoluteExpiration.Value, TimeSpan.Zero) : null;
+        => cacheItem.AbsoluteExpiration.HasValue
+            ? new DateTimeOffset(cacheItem.AbsoluteExpiration.Value, TimeSpan.Zero)
+            : null;
 
     public static CacheItem SetAbsoluteExpiration(this CacheItem cacheItem, DateTimeOffset? value)
     {

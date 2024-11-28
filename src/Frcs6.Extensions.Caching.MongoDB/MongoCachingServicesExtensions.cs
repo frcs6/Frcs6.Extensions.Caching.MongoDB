@@ -15,8 +15,15 @@ public static class MongoCachingServicesExtensions
     /// <param name="mongoConnectionString">Mongo connection string.</param>
     /// <param name="setupAction">Options configuration actions.</param>
     /// <returns>Service collection.</returns>
-    public static IServiceCollection AddMongoCache(this IServiceCollection services, string mongoConnectionString, Action<MongoCacheOptions> setupAction)
-        => services.AddMongoCache(new MongoClient(mongoConnectionString), setupAction);
+    public static IServiceCollection AddMongoCache(
+        this IServiceCollection services,
+        string mongoConnectionString,
+        Action<MongoCacheOptions> setupAction)
+    {
+        return services
+            .AddSingleton<IMongoClient>(_ => new MongoClient(mongoConnectionString))
+            .AddMongoCache(setupAction);
+    }
 
     /// <summary>
     /// Register cache.
@@ -25,17 +32,28 @@ public static class MongoCachingServicesExtensions
     /// <param name="mongoClientSettings">Mongo connection settings.</param>
     /// <param name="setupAction">Options configuration actions.</param>
     /// <returns>Service collection.</returns>
-    public static IServiceCollection AddMongoCache(this IServiceCollection services, MongoClientSettings mongoClientSettings, Action<MongoCacheOptions> setupAction)
-        => services.AddMongoCache(new MongoClient(mongoClientSettings), setupAction);
+    public static IServiceCollection AddMongoCache(
+        this IServiceCollection services,
+        MongoClientSettings mongoClientSettings,
+        Action<MongoCacheOptions> setupAction)
+    {
+        return services
+            .AddSingleton<IMongoClient>(_ => new MongoClient(mongoClientSettings))
+            .AddMongoCache(setupAction);
+    }
 
     /// <summary>
     /// Register cache.
     /// </summary>
+    /// <remarks>
+    /// <see cref="IMongoClient"/> must be available in <see cref="IServiceCollection"/>.
+    /// </remarks>
     /// <param name="services">Service collection.</param>
-    /// <param name="mongoClient">Mongo client.</param>
     /// <param name="setupAction">Options configuration actions.</param>
     /// <returns>Service collection.</returns>
-    public static IServiceCollection AddMongoCache(this IServiceCollection services, IMongoClient mongoClient, Action<MongoCacheOptions> setupAction)
+    public static IServiceCollection AddMongoCache(
+        this IServiceCollection services,
+        Action<MongoCacheOptions> setupAction)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(setupAction);
@@ -43,9 +61,10 @@ public static class MongoCachingServicesExtensions
         services.AddOptions();
         services.Configure(setupAction);
 
-        services.Add(ServiceDescriptor.Singleton<IDistributedCache, MongoCache>((serviceProvider) =>
+        services.Add(ServiceDescriptor.Singleton<IDistributedCache, MongoCache>(serviceProvider =>
         {
             var mongoCacheOptions = serviceProvider.GetMongoCacheOptions();
+            var mongoClient = serviceProvider.GetMongoClient();
             return new MongoCache(
                 new CacheItemBuilder(DefaultTimeProvider(), mongoCacheOptions),
                 new CacheItemRepository(mongoClient, DefaultTimeProvider(), mongoCacheOptions)
@@ -59,15 +78,22 @@ public static class MongoCachingServicesExtensions
         {
             services.AddHostedService((serviceProvider) =>
             {
-                var mongoCacheOptions = serviceProvider.GetMongoCacheOptions();
+                var cacheOptions = serviceProvider.GetMongoCacheOptions();
+                var mongoClient = serviceProvider.GetMongoClient();
                 return new CleanCacheJobs(
-                    new CacheItemRepository(mongoClient, DefaultTimeProvider(), mongoCacheOptions),
-                    mongoCacheOptions);
+                    new CacheItemRepository(mongoClient, DefaultTimeProvider(), cacheOptions),
+                    cacheOptions);
             });
         }
 
         return services;
     }
+
+
+    [ExcludeFromCodeCoverage]
+    private static IMongoClient GetMongoClient(this IServiceProvider serviceProvider) =>
+        serviceProvider.GetService<IMongoClient>() ??
+        throw new InvalidOperationException("No MongoClient found.");
 
     [ExcludeFromCodeCoverage]
     private static IOptions<MongoCacheOptions> GetMongoCacheOptions(this IServiceProvider serviceProvider) =>
