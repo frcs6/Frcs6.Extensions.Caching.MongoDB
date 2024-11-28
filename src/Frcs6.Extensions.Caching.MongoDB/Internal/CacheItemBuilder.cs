@@ -57,29 +57,15 @@ internal sealed class CacheItemBuilder(TimeProvider timeProvider, IOptions<Mongo
         DateTimeOffset? absoluteExpiration,
         DistributedCacheEntryOptions options)
     {
-        if (absoluteExpiration.HasValue && options.SlidingExpiration.HasValue)
-        {
-            return Math.Min(
+        return absoluteExpiration.HasValue && options.SlidingExpiration.HasValue
+            ? Math.Min(
                 (absoluteExpiration.Value - creationTime).TotalSeconds,
-                options.SlidingExpiration.Value.TotalSeconds);
-        }
-
-        if (absoluteExpiration.HasValue)
-        {
-            return (absoluteExpiration.Value - creationTime).TotalSeconds;
-        }
-
-        if (options.SlidingExpiration.HasValue)
-        {
-            return options.SlidingExpiration.Value.TotalSeconds;
-        }
-
-        if (!mongoCacheOptions.Value.AllowNoExpiration)
-        {
-            throw new InvalidOperationException("Cache without expiration is not allowed");
-        }
-
-        return null;
+                options.SlidingExpiration.Value.TotalSeconds)
+            : absoluteExpiration.HasValue
+                ? (absoluteExpiration.Value - creationTime).TotalSeconds
+                : options.SlidingExpiration?.TotalSeconds ?? (!mongoCacheOptions.Value.AllowNoExpiration
+                    ? throw new InvalidOperationException("Cache without expiration is not allowed")
+                    : null);
     }
 
     private static DateTimeOffset? GetAbsoluteExpiration(
@@ -91,11 +77,8 @@ internal sealed class CacheItemBuilder(TimeProvider timeProvider, IOptions<Mongo
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(options.AbsoluteExpiration.Value, creationTime);
         }
 
-        if (options.AbsoluteExpirationRelativeToNow.HasValue)
-        {
-            return creationTime + options.AbsoluteExpirationRelativeToNow.Value;
-        }
-
-        return options.AbsoluteExpiration;
+        return options.AbsoluteExpirationRelativeToNow.HasValue
+            ? creationTime + options.AbsoluteExpirationRelativeToNow.Value
+            : options.AbsoluteExpiration;
     }
 }
