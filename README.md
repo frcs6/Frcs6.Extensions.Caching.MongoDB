@@ -19,7 +19,7 @@ Some examples are available [here](./examples/).
 
 ## MongoCache injection
 
-You cand inject Mongo cache using ```MongoCachingServicesExtensions.AddMongoCache``` method with one of these parameters :
+You can inject Mongo cache using ```MongoCachingServicesExtensions.AddMongoCache``` method with one of these parameters :
   - ```ConnectionString```.
   - ```MongoClientSettings```.
   - ```IMongoClient```.

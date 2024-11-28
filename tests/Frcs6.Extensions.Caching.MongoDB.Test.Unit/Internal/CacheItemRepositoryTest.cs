@@ -26,7 +26,7 @@ public class CacheItemRepositoryTest : BaseTest
     [InlineData("DatabaseName", null)]
     public void GivenNoDatabaseParams_WhenCtor_ThenArgumentException(string? databaseName, string? collectionName)
     {
-        var mongoCacheOptions = new MongoCacheOptions { DatabaseName = databaseName, CollectionName = collectionName};
+        var mongoCacheOptions = new MongoCacheOptions { DatabaseName = databaseName, CollectionName = collectionName };
         var act = () => new CacheItemRepository(_mongoClient.Object, TimeProvider, Options.Create(mongoCacheOptions));
         act.Should().Throw<ArgumentException>();
     }
@@ -34,7 +34,10 @@ public class CacheItemRepositoryTest : BaseTest
     [Fact]
     public void Given_WhenCtor_ThenAddTwoIndex()
     {
-        _mongoIndexManager.Verify(m => m.CreateOne(It.IsAny<CreateIndexModel<CacheItem>>(), null, default), Times.Exactly(2));
+        _mongoIndexManager
+            .Verify(
+                m => m.CreateOne(It.IsAny<CreateIndexModel<CacheItem>>(), null, default),
+                Times.Exactly(2));
     }
 
     [Fact]

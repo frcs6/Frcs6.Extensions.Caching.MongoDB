@@ -9,13 +9,13 @@ public sealed class MongoCacheTest : BaseTest, IClassFixture<MongoDatabaseTest>,
 
     public MongoCacheTest(MongoDatabaseTest mongoDatabase)
     {
-#pragma warning disable CA1062 // Validate arguments of public methods
+        ArgumentNullException.ThrowIfNull(mongoDatabase);
         _mongoClient = new MongoClient(mongoDatabase.GetConnectionString());
-#pragma warning restore CA1062 // Validate arguments of public methods
     }
 
     public void Dispose()
     {
+        _mongoClient.Dispose();
         _cacheItemRepository?.Dispose();
     }
 
@@ -35,7 +35,8 @@ public sealed class MongoCacheTest : BaseTest, IClassFixture<MongoDatabaseTest>,
         var value2 = Fixture.Create<string>();
 
         cache.SetString(key1, value1);
-        cache.SetString(key2, value2, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20) });
+        cache.SetString(key2, value2,
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20) });
 
         cache.GetString(key1).Should().Be(value1);
         cache.GetString(key2).Should().Be(value2);
@@ -65,7 +66,8 @@ public sealed class MongoCacheTest : BaseTest, IClassFixture<MongoDatabaseTest>,
         var value2 = Fixture.Create<string>();
 
         await cache.SetStringAsync(key1, value1);
-        await cache.SetStringAsync(key2, value2, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20) });
+        await cache.SetStringAsync(key2, value2,
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20) });
 
         (await cache.GetStringAsync(key1)).Should().Be(value1);
         (await cache.GetStringAsync(key2)).Should().Be(value2);
@@ -115,7 +117,8 @@ public sealed class MongoCacheTest : BaseTest, IClassFixture<MongoDatabaseTest>,
         var key = Fixture.Create<string>();
         var value = Fixture.Create<string>();
 
-        await cache.SetStringAsync(key, value, new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromSeconds(20) });
+        await cache.SetStringAsync(key, value,
+            new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromSeconds(20) });
 
         for (int i = 0; i < 5; ++i)
         {

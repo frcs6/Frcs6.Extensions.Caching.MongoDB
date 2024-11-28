@@ -7,7 +7,7 @@ namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated;
 public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTest>
 {
     private readonly MongoDatabaseTest _mongoDatabase;
-    private readonly IServiceCollection _services = new ServiceCollection();
+    private readonly ServiceCollection _services = new();
 
 #pragma warning disable IDE0290 // Use primary constructor
     public MongoCachingServicesExtensionsTest(MongoDatabaseTest mongoDatabase)
@@ -24,7 +24,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
             options.DatabaseName = BaseTest.DatabaseName;
             options.CollectionName = BaseTest.CollectionName;
         });
-        _services.Count.Should().Be(7);
+        _services.Count.Should().Be(8);
         AssertSingletonMongoCache();
         AssertNoCleanCacheJobs();
     }
@@ -33,12 +33,12 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
     public void GivenMongoClientSettings_WhenAddMongoCache_ThenAddSingleton()
     {
         var settings = MongoClientSettings.FromConnectionString(_mongoDatabase.GetConnectionString());
-        _services.AddMongoCache(settings, (options) =>
+        _services.AddMongoCache(settings, options =>
         {
             options.DatabaseName = BaseTest.DatabaseName;
             options.CollectionName = BaseTest.CollectionName;
         });
-        _services.Count.Should().Be(7);
+        _services.Count.Should().Be(8);
         AssertSingletonMongoCache();
         AssertNoCleanCacheJobs();
     }
@@ -46,13 +46,13 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
     [Fact]
     public void GivenMongoClient_WhenAddMongoCache_ThenAddSingleton()
     {
-        var client = new MongoClient(_mongoDatabase.GetConnectionString());
-        _services.AddMongoCache(client, (options) =>
+        _services.AddSingleton<IMongoClient>(_ => new MongoClient(_mongoDatabase.GetConnectionString()));
+        _services.AddMongoCache(options =>
         {
             options.DatabaseName = BaseTest.DatabaseName;
             options.CollectionName = BaseTest.CollectionName;
         });
-        _services.Count.Should().Be(7);
+        _services.Count.Should().Be(8);
         AssertSingletonMongoCache();
         AssertNoCleanCacheJobs();
     }
@@ -60,15 +60,15 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
     [Fact]
     public void GivenMongoClient_WhenAddMongoCacheWithJobs_ThenAddSingleton()
     {
-        var client = new MongoClient(_mongoDatabase.GetConnectionString());
-        _services.AddMongoCache(client, (options) =>
+        _services.AddSingleton<IMongoClient>(_ => new MongoClient(_mongoDatabase.GetConnectionString()));
+        _services.AddMongoCache(options =>
         {
             options.DatabaseName = BaseTest.DatabaseName;
             options.CollectionName = BaseTest.CollectionName;
             options.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
             options.UseCleanCacheJobs = true;
         });
-        _services.Count.Should().Be(8);
+        _services.Count.Should().Be(9);
         AssertSingletonMongoCache();
         AssertCleanCacheJobs();
     }

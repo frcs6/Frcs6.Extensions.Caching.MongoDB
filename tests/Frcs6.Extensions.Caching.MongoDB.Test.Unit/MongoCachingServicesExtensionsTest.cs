@@ -11,19 +11,18 @@ public class MongoCachingServicesExtensionsTest : BaseTest
     [Fact]
     public void GivenNullServices_WhenAddMongoCache_ThenThrow()
     {
-        var act = () => MongoCachingServicesExtensions.AddMongoCache(null!, MongoConnectionString, (options) => { });
+        var act = () => MongoCachingServicesExtensions.AddMongoCache(null!, MongoConnectionString, _ => { });
         act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
     public void GivenNullActions_WhenAddMongoCache_ThenThrow()
     {
-        var act = () => MongoCachingServicesExtensions.AddMongoCache(_testService, MongoConnectionString, null!);
+        var act = () => _testService.AddMongoCache(MongoConnectionString, null!);
         act.Should().Throw<ArgumentNullException>();
     }
 
     private sealed class TestServiceCollection : List<ServiceDescriptor>, IServiceCollection
     {
-
     }
 }

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Hosting;
+
 namespace Frcs6.Extensions.Caching.MongoDB;
 
 /// <summary>
