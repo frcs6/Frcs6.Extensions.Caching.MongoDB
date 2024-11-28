@@ -19,7 +19,7 @@ public abstract class BaseTest
     protected CancellationToken DefaultToken { get; } = CancellationToken.None;
     protected DateTimeOffset UtcNow { get; private set; }
 
-    private MongoCacheOptions MongoCacheOptions { get; } = new()
+    protected MongoCacheOptions MongoCacheOptions { get; } = new()
     {
         DatabaseName = DatabaseName,
         CollectionName = CollectionName,
