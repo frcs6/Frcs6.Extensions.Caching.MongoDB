@@ -1,6 +1,8 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated.Internal;
 
+#pragma warning disable CA1063
 public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest>, IDisposable
+#pragma warning restore CA1063
 {
     private readonly MongoClient _mongoClient;
     private readonly IMongoCollection<CacheItem> _cacheItemCollection;
@@ -13,7 +15,11 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         _cacheItemCollection = _mongoClient.GetDatabase(DatabaseName).GetCollection<CacheItem>(CollectionName);
     }
 
+#pragma warning disable CA1816
+#pragma warning disable CA1063
     public void Dispose()
+#pragma warning restore CA1063
+#pragma warning restore CA1816
     {
         _mongoClient.Dispose();
     }
