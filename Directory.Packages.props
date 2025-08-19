@@ -13,7 +13,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="MongoDB.Driver" Version="3.4.2" />
+    <PackageVersion Include="MongoDB.Driver" Version="3.4.3" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
