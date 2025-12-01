@@ -4,22 +4,14 @@ using Microsoft.Extensions.Hosting;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Integrated;
 
-public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTest>
+public class MongoCachingServicesExtensionsTest(MongoDatabaseTest mongoDatabase) : IClassFixture<MongoDatabaseTest>
 {
-    private readonly MongoDatabaseTest _mongoDatabase;
-    private readonly ServiceCollection _services = new();
-
-#pragma warning disable IDE0290 // Use primary constructor
-    public MongoCachingServicesExtensionsTest(MongoDatabaseTest mongoDatabase)
-#pragma warning restore IDE0290 // Use primary constructor
-    {
-        _mongoDatabase = mongoDatabase;
-    }
+    private readonly ServiceCollection _services = [];
 
     [Fact]
     public void GivenConnectionString_WhenAddMongoCache_ThenAddSingleton()
     {
-        _services.AddMongoCache(_mongoDatabase.GetConnectionString(), (options) =>
+        _services.AddMongoCache(mongoDatabase.GetConnectionString(), (options) =>
         {
             options.DatabaseName = BaseTest.DatabaseName;
             options.CollectionName = BaseTest.CollectionName;
@@ -32,7 +24,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
     [Fact]
     public void GivenMongoClientSettings_WhenAddMongoCache_ThenAddSingleton()
     {
-        var settings = MongoClientSettings.FromConnectionString(_mongoDatabase.GetConnectionString());
+        var settings = MongoClientSettings.FromConnectionString(mongoDatabase.GetConnectionString());
         _services.AddMongoCache(settings, options =>
         {
             options.DatabaseName = BaseTest.DatabaseName;
@@ -46,7 +38,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
     [Fact]
     public void GivenMongoClient_WhenAddMongoCache_ThenAddSingleton()
     {
-        _services.AddSingleton<IMongoClient>(_ => new MongoClient(_mongoDatabase.GetConnectionString()));
+        _services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoDatabase.GetConnectionString()));
         _services.AddMongoCache(options =>
         {
             options.DatabaseName = BaseTest.DatabaseName;
@@ -60,7 +52,7 @@ public class MongoCachingServicesExtensionsTest : IClassFixture<MongoDatabaseTes
     [Fact]
     public void GivenMongoClient_WhenAddMongoCacheWithJobs_ThenAddSingleton()
     {
-        _services.AddSingleton<IMongoClient>(_ => new MongoClient(_mongoDatabase.GetConnectionString()));
+        _services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoDatabase.GetConnectionString()));
         _services.AddMongoCache(options =>
         {
             options.DatabaseName = BaseTest.DatabaseName;

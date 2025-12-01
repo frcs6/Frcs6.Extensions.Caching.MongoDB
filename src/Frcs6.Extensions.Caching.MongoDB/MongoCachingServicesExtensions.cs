@@ -8,97 +8,94 @@ namespace Frcs6.Extensions.Caching.MongoDB;
 /// </summary>
 public static class MongoCachingServicesExtensions
 {
-    /// <summary>
-    /// Register cache.
-    /// </summary>
     /// <param name="services">Service collection.</param>
-    /// <param name="mongoConnectionString">Mongo connection string.</param>
-    /// <param name="setupAction">Options configuration actions.</param>
-    /// <returns>Service collection.</returns>
-    public static IServiceCollection AddMongoCache(
-        this IServiceCollection services,
-        string mongoConnectionString,
-        Action<MongoCacheOptions> setupAction)
+    extension(IServiceCollection services)
     {
-        return services
-            .AddSingleton<IMongoClient>(_ => new MongoClient(mongoConnectionString))
-            .AddMongoCache(setupAction);
-    }
-
-    /// <summary>
-    /// Register cache.
-    /// </summary>
-    /// <param name="services">Service collection.</param>
-    /// <param name="mongoClientSettings">Mongo connection settings.</param>
-    /// <param name="setupAction">Options configuration actions.</param>
-    /// <returns>Service collection.</returns>
-    public static IServiceCollection AddMongoCache(
-        this IServiceCollection services,
-        MongoClientSettings mongoClientSettings,
-        Action<MongoCacheOptions> setupAction)
-    {
-        return services
-            .AddSingleton<IMongoClient>(_ => new MongoClient(mongoClientSettings))
-            .AddMongoCache(setupAction);
-    }
-
-    /// <summary>
-    /// Register cache.
-    /// </summary>
-    /// <remarks>
-    /// <see cref="IMongoClient"/> must be available in <see cref="IServiceCollection"/>.
-    /// </remarks>
-    /// <param name="services">Service collection.</param>
-    /// <param name="setupAction">Options configuration actions.</param>
-    /// <returns>Service collection.</returns>
-    public static IServiceCollection AddMongoCache(
-        this IServiceCollection services,
-        Action<MongoCacheOptions> setupAction)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(setupAction);
-
-        services.AddOptions();
-        services.Configure(setupAction);
-
-        services.Add(ServiceDescriptor.Singleton<IDistributedCache, MongoCache>(serviceProvider =>
+        /// <summary>
+        /// Register cache.
+        /// </summary>
+        /// <param name="mongoConnectionString">Mongo connection string.</param>
+        /// <param name="setupAction">Options configuration actions.</param>
+        /// <returns>Service collection.</returns>
+        public IServiceCollection AddMongoCache(string mongoConnectionString,
+            Action<MongoCacheOptions> setupAction)
         {
-            var mongoCacheOptions = serviceProvider.GetMongoCacheOptions();
-            var mongoClient = serviceProvider.GetMongoClient();
-            return new MongoCache(
-                new CacheItemBuilder(DefaultTimeProvider(), mongoCacheOptions),
-                new CacheItemRepository(mongoClient, DefaultTimeProvider(), mongoCacheOptions)
-            );
-        }));
-
-        var mongoCacheOptions = new MongoCacheOptions();
-        setupAction(mongoCacheOptions);
-
-        if (mongoCacheOptions.UseCleanCacheJobs)
-        {
-            services.AddHostedService((serviceProvider) =>
-            {
-                var cacheOptions = serviceProvider.GetMongoCacheOptions();
-                var mongoClient = serviceProvider.GetMongoClient();
-                return new CleanCacheJobs(
-                    new CacheItemRepository(mongoClient, DefaultTimeProvider(), cacheOptions),
-                    cacheOptions);
-            });
+            return services
+                .AddSingleton<IMongoClient>(_ => new MongoClient(mongoConnectionString))
+                .AddMongoCache(setupAction);
         }
 
-        return services;
+        /// <summary>
+        /// Register cache.
+        /// </summary>
+        /// <param name="mongoClientSettings">Mongo connection settings.</param>
+        /// <param name="setupAction">Options configuration actions.</param>
+        /// <returns>Service collection.</returns>
+        public IServiceCollection AddMongoCache(MongoClientSettings mongoClientSettings,
+            Action<MongoCacheOptions> setupAction)
+        {
+            return services
+                .AddSingleton<IMongoClient>(_ => new MongoClient(mongoClientSettings))
+                .AddMongoCache(setupAction);
+        }
+
+        /// <summary>
+        /// Register cache.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="IMongoClient"/> must be available in <see cref="IServiceCollection"/>.
+        /// </remarks>
+        /// <param name="setupAction">Options configuration actions.</param>
+        /// <returns>Service collection.</returns>
+        public IServiceCollection AddMongoCache(Action<MongoCacheOptions> setupAction)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            ArgumentNullException.ThrowIfNull(setupAction);
+
+            services.AddOptions();
+            services.Configure(setupAction);
+
+            services.Add(ServiceDescriptor.Singleton<IDistributedCache, MongoCache>(serviceProvider =>
+            {
+                var mongoCacheOptions = serviceProvider.GetMongoCacheOptions();
+                var mongoClient = serviceProvider.GetMongoClient();
+                return new MongoCache(
+                    new CacheItemBuilder(DefaultTimeProvider(), mongoCacheOptions),
+                    new CacheItemRepository(mongoClient, DefaultTimeProvider(), mongoCacheOptions)
+                );
+            }));
+
+            var mongoCacheOptions = new MongoCacheOptions();
+            setupAction(mongoCacheOptions);
+
+            if (mongoCacheOptions.UseCleanCacheJobs)
+            {
+                services.AddHostedService((serviceProvider) =>
+                {
+                    var cacheOptions = serviceProvider.GetMongoCacheOptions();
+                    var mongoClient = serviceProvider.GetMongoClient();
+                    return new CleanCacheJobs(
+                        new CacheItemRepository(mongoClient, DefaultTimeProvider(), cacheOptions),
+                        cacheOptions);
+                });
+            }
+
+            return services;
+        }
     }
 
+    extension(IServiceProvider serviceProvider)
+    {
+        [ExcludeFromCodeCoverage]
+        private IMongoClient GetMongoClient() =>
+            serviceProvider.GetService<IMongoClient>() ??
+            throw new InvalidOperationException("No MongoClient found.");
 
-    [ExcludeFromCodeCoverage]
-    private static IMongoClient GetMongoClient(this IServiceProvider serviceProvider) =>
-        serviceProvider.GetService<IMongoClient>() ??
-        throw new InvalidOperationException("No MongoClient found.");
-
-    [ExcludeFromCodeCoverage]
-    private static IOptions<MongoCacheOptions> GetMongoCacheOptions(this IServiceProvider serviceProvider) =>
-        serviceProvider.GetService<IOptions<MongoCacheOptions>>() ??
-        throw new InvalidOperationException("No MongoCache options found.");
+        [ExcludeFromCodeCoverage]
+        private IOptions<MongoCacheOptions> GetMongoCacheOptions() =>
+            serviceProvider.GetService<IOptions<MongoCacheOptions>>() ??
+            throw new InvalidOperationException("No MongoCache options found.");
+    }
 
     private static TimeProvider DefaultTimeProvider() => TimeProvider.System;
 }

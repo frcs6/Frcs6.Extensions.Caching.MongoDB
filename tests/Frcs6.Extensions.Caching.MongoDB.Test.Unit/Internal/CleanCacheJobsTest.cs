@@ -25,11 +25,9 @@ public class CleanCacheJobsTest : BaseTest
     [Fact]
     public void GivenJobs_WhenExecute_ThenRemoveExpired()
     {
-        _sut.StartAsync(default);
-#pragma warning disable CS8629 // Nullable value type may be null.
-        Thread.Sleep(2 * MongoCacheOptions.RemoveExpiredDelay.Value);
-#pragma warning restore CS8629 // Nullable value type may be null.
-        _sut.StopAsync(default);
+        _sut.StartAsync(CancellationToken.None);
+        Thread.Sleep(2 * MongoCacheOptions.RemoveExpiredDelay!.Value);
+        _sut.StopAsync(CancellationToken.None);
 
         _cacheItemRepository.Verify(r => r.RemoveExpired(true), Times.AtLeastOnce);
     }
