@@ -5,9 +5,8 @@ using Microsoft.Extensions.Caching.Distributed;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();             // Nouveau système OpenAPI
 
 using var mongoDatabase = new MongoDatabaseTest();
 builder.Services.AddMongoCache(mongoDatabase.GetConnectionString(), options =>
@@ -23,7 +22,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.MapOpenApi();
     app.UseSwaggerUI();
 }
 
@@ -36,26 +35,25 @@ app.MapGet("/generate", (IDistributedCache cache) =>
     if (value == null)
     {
         value = Guid.NewGuid().ToString();
-        cache.SetString(key, value, new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromSeconds(60) });
+        cache.SetString(key, value, new DistributedCacheEntryOptions 
+        { 
+            SlidingExpiration = TimeSpan.FromSeconds(60) 
+        });
         return new CacheData(false, key, value!);
     }
     return new CacheData(true, key, value!);
 })
-.WithName("Generate")
-.WithOpenApi();
+.WithName("Generate");
 
 app.MapGet("/{key}", (string key, IDistributedCache cache) =>
 {
     var value = cache.GetString(key);
     return new CacheData(value != null, key, value!);
 })
-.WithName("GetByKey")
-.WithOpenApi();
+.WithName("GetByKey");
 
 app.Run();
 
 mongoDatabase.Dispose();
 
-record CacheData(bool FromCache, string Key, string Value)
-{
-}
+record CacheData(bool FromCache, string Key, string Value);

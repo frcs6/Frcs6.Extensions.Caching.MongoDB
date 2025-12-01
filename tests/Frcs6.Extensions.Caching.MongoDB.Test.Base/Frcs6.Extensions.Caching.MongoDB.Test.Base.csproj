@@ -10,8 +10,6 @@
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Moq" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" />
-    <PackageReference Include="System.Text.RegularExpressions" />
     <PackageReference Include="Testcontainers.MongoDb" />
   </ItemGroup>  
 
