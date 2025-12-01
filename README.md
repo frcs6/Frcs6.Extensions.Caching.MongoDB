@@ -11,8 +11,8 @@ This implementation is based on the official version for Sql Server and Redis av
 
 ## ⚠️ Compatibility Warning
 
-**Version 6.x** de `Frcs6.Extensions.Caching.MongoDB` est **compatible uniquement avec .NET 10**.  
-Les versions **5.x** sont compatibles avec **.NET 8 et .NET 9**.
+**Version 6.x** supports **.NET 10 only**.  
+For **.NET 8** or **.NET 9**, use **version 5.x**.
 
 ## Installation / Usage
 
