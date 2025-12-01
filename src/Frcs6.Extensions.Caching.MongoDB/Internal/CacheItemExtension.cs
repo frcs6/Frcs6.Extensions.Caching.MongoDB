@@ -2,29 +2,32 @@
 
 internal static class CacheItemExtension
 {
-    public static DateTimeOffset? GetAbsoluteExpiration(this CacheItem cacheItem)
-        => cacheItem.AbsoluteExpiration.HasValue
-            ? new DateTimeOffset(cacheItem.AbsoluteExpiration.Value, TimeSpan.Zero)
-            : null;
-
-    public static CacheItem SetAbsoluteExpiration(this CacheItem cacheItem, DateTimeOffset? value)
+    extension(CacheItem cacheItem)
     {
-        cacheItem.AbsoluteExpiration = value?.Ticks;
-        return cacheItem;
-    }
+        public DateTimeOffset? GetAbsoluteExpiration()
+            => cacheItem.AbsoluteExpiration.HasValue
+                ? new DateTimeOffset(cacheItem.AbsoluteExpiration.Value, TimeSpan.Zero)
+                : null;
 
-    public static TimeSpan? GetSlidingExpiration(this CacheItem cacheItem)
-        => cacheItem.SlidingExpiration.HasValue ? new TimeSpan(cacheItem.SlidingExpiration.Value) : null;
+        public CacheItem SetAbsoluteExpiration(DateTimeOffset? value)
+        {
+            cacheItem.AbsoluteExpiration = value?.Ticks;
+            return cacheItem;
+        }
 
-    public static CacheItem SetSlidingExpiration(this CacheItem cacheItem, TimeSpan? value)
-    {
-        cacheItem.SlidingExpiration = value?.Ticks;
-        return cacheItem;
-    }
+        public TimeSpan? GetSlidingExpiration()
+            => cacheItem.SlidingExpiration.HasValue ? new TimeSpan(cacheItem.SlidingExpiration.Value) : null;
 
-    public static CacheItem SetExpireAt(this CacheItem cacheItem, DateTimeOffset? value)
-    {
-        cacheItem.ExpireAt = value?.Ticks;
-        return cacheItem;
+        public CacheItem SetSlidingExpiration(TimeSpan? value)
+        {
+            cacheItem.SlidingExpiration = value?.Ticks;
+            return cacheItem;
+        }
+
+        public CacheItem SetExpireAt(DateTimeOffset? value)
+        {
+            cacheItem.ExpireAt = value?.Ticks;
+            return cacheItem;
+        }
     }
 }

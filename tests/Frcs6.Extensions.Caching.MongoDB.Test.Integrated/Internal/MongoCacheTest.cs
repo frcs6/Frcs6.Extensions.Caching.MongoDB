@@ -120,7 +120,7 @@ public sealed class MongoCacheTest : BaseTest, IClassFixture<MongoDatabaseTest>,
         await cache.SetStringAsync(key, value,
             new DistributedCacheEntryOptions { SlidingExpiration = TimeSpan.FromSeconds(20) });
 
-        for (int i = 0; i < 5; ++i)
+        for (var i = 0; i < 5; ++i)
         {
             ConfigureUtcNow(UtcNow.AddSeconds(10));
             await cache.RefreshAsync(key);

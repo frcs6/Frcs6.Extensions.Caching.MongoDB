@@ -11,12 +11,15 @@ var serviceProvider = new ServiceCollection().AddMongoCache(mongoDatabase.GetCon
     options.RemoveExpiredDelay = TimeSpan.FromSeconds(10);
 }).BuildServiceProvider();
 
-IDistributedCache? cache = serviceProvider.GetService<IDistributedCache>();
+var cache = serviceProvider.GetService<IDistributedCache>();
 ArgumentNullException.ThrowIfNull(cache);
 
 const string key = "key";
 var value = Guid.NewGuid().ToString();
-cache.SetString(key, value);
+cache.SetString(key, value, new DistributedCacheEntryOptions
+{
+    SlidingExpiration = TimeSpan.FromSeconds(60)
+});
 value = cache.GetString(key);
 
 Console.WriteLine($"Cached value: '{value}'");

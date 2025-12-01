@@ -1,12 +1,12 @@
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit.Internal;
 
-public partial class MongoCacheTest : BaseTest
+public class MongoCacheTest : BaseTest
 {
     private readonly DistributedCacheEntryOptions _options;
     private readonly CacheItem _cacheItem;
     private readonly CacheItem _cacheItemNullValue;
-    private readonly Mock<ICacheItemBuilder> _cacheItemBuilder = new();
-    private readonly Mock<ICacheItemRepository> _cacheItemRepository = new();
+    private readonly Mock<ICacheItemBuilder> _cacheItemBuilder;
+    private readonly Mock<ICacheItemRepository> _cacheItemRepository;
     private readonly MongoCache _sut;
 
     public MongoCacheTest()
