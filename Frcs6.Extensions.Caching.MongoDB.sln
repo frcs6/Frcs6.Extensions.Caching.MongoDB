@@ -15,6 +15,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frcs6.Extensions.Caching.Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frcs6.Extensions.Caching.MongoDB.Test.Integrated", "tests\Frcs6.Extensions.Caching.MongoDB.Test.Integrated\Frcs6.Extensions.Caching.MongoDB.Test.Integrated.csproj", "{9E4443A2-8741-48E0-8FC8-6C3084CEFE5A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "props", "props", "{A55E144D-608A-43E8-BFBC-4020F4A26986}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
