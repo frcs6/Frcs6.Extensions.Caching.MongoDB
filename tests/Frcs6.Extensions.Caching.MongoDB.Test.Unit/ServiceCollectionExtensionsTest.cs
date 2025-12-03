@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Frcs6.Extensions.Caching.MongoDB.Test.Unit;
 
-public class MongoCachingServicesExtensionsTest : BaseTest
+public class ServiceCollectionExtensionsTest : BaseTest
 {
     private const string MongoConnectionString = "mongodb://localhost:27017";
 
@@ -11,7 +11,7 @@ public class MongoCachingServicesExtensionsTest : BaseTest
     [Fact]
     public void GivenNullServices_WhenAddMongoCache_ThenThrow()
     {
-        var act = () => MongoCachingServicesExtensions.AddMongoCache(null!, MongoConnectionString, _ => { });
+        var act = () => ServiceCollectionExtensions.AddMongoCache(null!, MongoConnectionString, _ => { });
         act.ShouldThrow<ArgumentNullException>();
     }
 
