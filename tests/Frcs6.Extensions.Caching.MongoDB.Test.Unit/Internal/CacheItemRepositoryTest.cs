@@ -28,7 +28,7 @@ public class CacheItemRepositoryTest : BaseTest
     {
         var mongoCacheOptions = new MongoCacheOptions { DatabaseName = databaseName, CollectionName = collectionName };
         var act = () => new CacheItemRepository(_mongoClient.Object, TimeProvider, Options.Create(mongoCacheOptions));
-        act.Should().Throw<ArgumentException>();
+        act.ShouldThrow<ArgumentException>();
     }
 
     [Fact]
@@ -44,69 +44,69 @@ public class CacheItemRepositoryTest : BaseTest
     public void GivenNullKey_WhenRead_ThenArgumentNullException()
     {
         var act = () => _sut.Read(null!);
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
     public async Task GivenNullKey_WhenReadAsync_ThenArgumentNullException()
     {
         var act = () => _sut.ReadAsync(null!, default);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public void GivenNullKey_WhenReadPartial_ThenArgumentNullException()
     {
         var act = () => _sut.ReadPartial(null!);
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
     public async Task GivenNullKey_WhenReadPartialAsync_ThenArgumentNullException()
     {
         var act = () => _sut.ReadPartialAsync(null!, default);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public void GivenNullCacheItem_WhenWrite_ThenArgumentNullException()
     {
         var act = () => _sut.Write(null!);
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
     public async Task GivenNullCacheItem_WhenWriteAsync_ThenArgumentNullException()
     {
         var act = () => _sut.WriteAsync(null!, default);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public void GivenNullCacheItem_WhenWritePartial_ThenArgumentNullException()
     {
         var act = () => _sut.WritePartial(null!);
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
     public async Task GivenNullCacheItem_WhenWritePartialAsync_ThenArgumentNullException()
     {
         var act = () => _sut.WritePartialAsync(null!, default);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public void GivenNullKey_WhenRemove_ThenArgumentNullException()
     {
         var act = () => _sut.Remove(null!);
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
     public async Task GivenNullKey_WhenRemoveAsync_ThenArgumentNullException()
     {
         var act = () => _sut.RemoveAsync(null!, default);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 }

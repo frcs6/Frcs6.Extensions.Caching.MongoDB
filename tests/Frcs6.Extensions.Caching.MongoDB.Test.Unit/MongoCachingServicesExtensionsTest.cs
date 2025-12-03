@@ -12,14 +12,14 @@ public class MongoCachingServicesExtensionsTest : BaseTest
     public void GivenNullServices_WhenAddMongoCache_ThenThrow()
     {
         var act = () => MongoCachingServicesExtensions.AddMongoCache(null!, MongoConnectionString, _ => { });
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
     public void GivenNullActions_WhenAddMongoCache_ThenThrow()
     {
         var act = () => _testService.AddMongoCache(MongoConnectionString, null!);
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     private sealed class TestServiceCollection : List<ServiceDescriptor>, IServiceCollection

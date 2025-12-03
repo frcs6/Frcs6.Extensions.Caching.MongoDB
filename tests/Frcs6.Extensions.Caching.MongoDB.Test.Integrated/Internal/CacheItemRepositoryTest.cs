@@ -29,12 +29,13 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     {
         using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
+        cacheItem.Value = cacheItem.Value!.ToList();
         var result = sut.Read(cacheItem.Key!);
-        result.Should().BeNull();
+        result.ShouldBeNull();
 
         _cacheItemCollection.InsertOne(cacheItem);
         result = sut.Read(cacheItem.Key!);
-        result.Should().BeEquivalentTo(cacheItem);
+        result.ShouldBeEquivalentTo(cacheItem);
     }
 
     [Fact]
@@ -42,12 +43,13 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     {
         using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
+        cacheItem.Value = cacheItem.Value!.ToList();
         var result = await sut.ReadAsync(cacheItem.Key!, CancellationToken.None);
-        result.Should().BeNull();
+        result.ShouldBeNull();
 
         await _cacheItemCollection.InsertOneAsync(cacheItem);
         result = await sut.ReadAsync(cacheItem.Key!, CancellationToken.None);
-        result.Should().BeEquivalentTo(cacheItem);
+        result.ShouldBeEquivalentTo(cacheItem);
     }
 
     [Fact]
@@ -55,11 +57,12 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     {
         using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
+        cacheItem.Value = cacheItem.Value!.ToList();
 
         sut.Write(cacheItem);
 
         var result = _cacheItemCollection.Find(i => i.Key == cacheItem.Key).Single();
-        result.Should().BeEquivalentTo(cacheItem);
+        result.ShouldBeEquivalentTo(cacheItem);
     }
 
     [Fact]
@@ -67,11 +70,12 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     {
         using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
+        cacheItem.Value = cacheItem.Value!.ToList();
 
         await sut.WriteAsync(cacheItem, CancellationToken.None);
 
         var result = await _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleAsync();
-        result.Should().BeEquivalentTo(cacheItem);
+        result.ShouldBeEquivalentTo(cacheItem);
     }
 
     [Fact]
@@ -80,18 +84,17 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         var result = sut.ReadPartial(cacheItem.Key!);
-        result.Should().BeNull();
+        result.ShouldBeNull();
 
         _cacheItemCollection.InsertOne(cacheItem);
 
         result = sut.ReadPartial(cacheItem.Key!);
-        using (new AssertionScope())
-        {
-            result!.Value.Should().BeNull();
-            result
-                .Should()
-                .BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
-        }
+        result.ShouldNotBeNull();
+        result.Key.ShouldBe(cacheItem.Key);
+        result.Value.ShouldBeNull();
+        result.AbsoluteExpiration.ShouldBe(cacheItem.AbsoluteExpiration);
+        result.ExpireAt.ShouldBe(cacheItem.ExpireAt);
+        result.SlidingExpiration.ShouldBe(cacheItem.SlidingExpiration);
     }
 
     [Fact]
@@ -100,18 +103,18 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
         var result = await sut.ReadPartialAsync(cacheItem.Key!, CancellationToken.None);
-        result.Should().BeNull();
+        result.ShouldBeNull();
 
         await _cacheItemCollection.InsertOneAsync(cacheItem);
 
         result = await sut.ReadPartialAsync(cacheItem.Key!, CancellationToken.None);
-        using (new AssertionScope())
-        {
-            result!.Value.Should().BeNull();
-            result
-                .Should()
-                .BeEquivalentTo(cacheItem, option => option.Excluding(x => x.Value));
-        }
+        result.ShouldNotBeNull();
+        result.Key.ShouldBe(cacheItem.Key);
+        result.Value.ShouldBeNull();
+        result.AbsoluteExpiration.ShouldBe(cacheItem.AbsoluteExpiration);
+        result.ExpireAt.ShouldBe(cacheItem.ExpireAt);
+        result.SlidingExpiration.ShouldBe(cacheItem.SlidingExpiration);
+        
     }
 
     [Fact]
@@ -119,6 +122,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     {
         using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
+        cacheItem.Value = cacheItem.Value!.ToList();
         _cacheItemCollection.InsertOne(cacheItem);
         var newCacheItem = Fixture
             .Build<CacheItem>()
@@ -129,16 +133,12 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         sut.WritePartial(newCacheItem);
 
         var result = _cacheItemCollection.Find(i => i.Key == cacheItem.Key).Single();
-        using (new AssertionScope())
-        {
-            result.Value.Should().BeEquivalentTo(cacheItem.Value);
-            result
-                .Should()
-                .BeEquivalentTo(cacheItem, option => option
-                    .Excluding(x => x.AbsoluteExpiration)
-                    .Excluding(x => x.ExpireAt)
-                    .Excluding(x => x.SlidingExpiration));
-        }
+        result.ShouldNotBeNull();
+        result.Key.ShouldBe(cacheItem.Key);
+        result.Value.ShouldBeEquivalentTo(cacheItem.Value);
+        result.AbsoluteExpiration.ShouldNotBe(cacheItem.AbsoluteExpiration);
+        result.ExpireAt.ShouldNotBe(cacheItem.ExpireAt);
+        result.SlidingExpiration.ShouldNotBe(cacheItem.SlidingExpiration);
     }
 
     [Fact]
@@ -146,6 +146,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
     {
         using var sut = GetSut();
         var cacheItem = Fixture.Create<CacheItem>();
+        cacheItem.Value = cacheItem.Value!.ToList();
         await _cacheItemCollection.InsertOneAsync(cacheItem);
         var newCacheItem = Fixture
             .Build<CacheItem>()
@@ -156,16 +157,12 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         await sut.WritePartialAsync(newCacheItem, CancellationToken.None);
 
         var result = await _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleAsync();
-        using (new AssertionScope())
-        {
-            result.Value.Should().BeEquivalentTo(cacheItem.Value);
-            result
-                .Should()
-                .BeEquivalentTo(cacheItem, option => option
-                    .Excluding(x => x.AbsoluteExpiration)
-                    .Excluding(x => x.ExpireAt)
-                    .Excluding(x => x.SlidingExpiration));
-        }
+        result.ShouldNotBeNull();
+        result.Key.ShouldBe(cacheItem.Key);
+        result.Value.ShouldBeEquivalentTo(cacheItem.Value);
+        result.AbsoluteExpiration.ShouldNotBe(cacheItem.AbsoluteExpiration);
+        result.ExpireAt.ShouldNotBe(cacheItem.ExpireAt);
+        result.SlidingExpiration.ShouldNotBe(cacheItem.SlidingExpiration);
     }
 
     [Fact]
@@ -177,7 +174,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         sut.WritePartial(cacheItem);
 
         var result = _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleOrDefault();
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -189,7 +186,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         await sut.WritePartialAsync(cacheItem, CancellationToken.None);
 
         var result = await _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleOrDefaultAsync();
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -202,7 +199,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         sut.Remove(cacheItem.Key!);
 
         var result = _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleOrDefault();
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -215,7 +212,7 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
         await sut.RemoveAsync(cacheItem.Key!, CancellationToken.None);
 
         var result = await _cacheItemCollection.Find(i => i.Key == cacheItem.Key).SingleOrDefaultAsync();
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -226,11 +223,8 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 
         sut.RemoveExpired();
 
-        using (new AssertionScope())
-        {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(0));
-        }
+        cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(1));
+        expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(0));
     }
 
     [Fact]
@@ -242,11 +236,8 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 
         sut.RemoveExpired();
 
-        using (new AssertionScope())
-        {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(1));
-        }
+        cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(1));
+        expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(1));
     }
 
     [Fact]
@@ -259,11 +250,8 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 
         sut.RemoveExpired();
 
-        using (new AssertionScope())
-        {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(0));
-        }
+        cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(1));
+        expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(0));
     }
 
     [Fact]
@@ -275,11 +263,8 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 
         sut.RemoveExpired(true);
 
-        using (new AssertionScope())
-        {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(0));
-        }
+        cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(1));
+        expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(0));
     }
 
     [Fact]
@@ -290,11 +275,8 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 
         await sut.RemoveExpiredAsync(CancellationToken.None);
 
-        using (new AssertionScope())
-        {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(0));
-        }
+        cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(1));
+        expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(0));
     }
 
     [Fact]
@@ -306,11 +288,8 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 
         await sut.RemoveExpiredAsync(CancellationToken.None);
 
-        using (new AssertionScope())
-        {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(1));
-        }
+        cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(1));
+        expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(1));
     }
 
     [Fact]
@@ -323,11 +302,8 @@ public class CacheItemRepositoryTest : BaseTest, IClassFixture<MongoDatabaseTest
 
         await sut.RemoveExpiredAsync(CancellationToken.None);
 
-        using (new AssertionScope())
-        {
-            cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(1));
-            expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).Should().Be(0));
-        }
+        cacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(1));
+        expiredCacheItems.ForEach(c1 => _cacheItemCollection.CountDocuments(c2 => c2.Key == c1.Key).ShouldBe(0));
     }
 
     private CacheItemRepository GetSut(TimeSpan? removeExpiredDelay = null)

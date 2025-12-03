@@ -7,7 +7,7 @@ public class CacheItemExtensionTest
     {
         var cacheItem = new CacheItem();
         var result = cacheItem.GetAbsoluteExpiration();
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -16,7 +16,7 @@ public class CacheItemExtensionTest
         var absoluteExpiration = DateTimeOffset.UtcNow;
         var cacheItem = new CacheItem { AbsoluteExpiration = absoluteExpiration.Ticks };
         var result = cacheItem.GetAbsoluteExpiration();
-        result.Should().Be(absoluteExpiration);
+        result.ShouldBe(absoluteExpiration);
     }
 
     [Fact]
@@ -24,11 +24,8 @@ public class CacheItemExtensionTest
     {
         var cacheItem = new CacheItem { AbsoluteExpiration = DateTimeOffset.UtcNow.Ticks };
         var result = cacheItem.SetAbsoluteExpiration(null);
-        using (new AssertionScope())
-        {
-            result.AbsoluteExpiration.Should().BeNull();
-            result.Should().Be(cacheItem);
-        }
+        result.AbsoluteExpiration.ShouldBeNull();
+        result.ShouldBe(cacheItem);
     }
 
     [Fact]
@@ -37,11 +34,8 @@ public class CacheItemExtensionTest
         var absoluteExpiration = DateTimeOffset.UtcNow;
         var cacheItem = new CacheItem();
         var result = cacheItem.SetAbsoluteExpiration(absoluteExpiration);
-        using (new AssertionScope())
-        {
-            result.AbsoluteExpiration.Should().Be(absoluteExpiration.Ticks);
-            result.Should().Be(cacheItem);
-        }
+        result.AbsoluteExpiration.ShouldBe(absoluteExpiration.Ticks);
+        result.ShouldBe(cacheItem);
     }
 
     [Fact]
@@ -49,7 +43,7 @@ public class CacheItemExtensionTest
     {
         var cacheItem = new CacheItem();
         var result = cacheItem.GetSlidingExpiration();
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -58,7 +52,7 @@ public class CacheItemExtensionTest
         var slidingExpiration = new TimeSpan(1234);
         var cacheItem = new CacheItem { SlidingExpiration = slidingExpiration.Ticks };
         var result = cacheItem.GetSlidingExpiration();
-        result.Should().Be(slidingExpiration);
+        result.ShouldBe(slidingExpiration);
     }
 
     [Fact]
@@ -66,11 +60,8 @@ public class CacheItemExtensionTest
     {
         var cacheItem = new CacheItem { SlidingExpiration = 1234 };
         var result = cacheItem.SetSlidingExpiration(null);
-        using (new AssertionScope())
-        {
-            result.SlidingExpiration.Should().BeNull();
-            result.Should().Be(cacheItem);
-        }
+        result.SlidingExpiration.ShouldBeNull();
+        result.ShouldBe(cacheItem);
     }
 
     [Fact]
@@ -79,11 +70,8 @@ public class CacheItemExtensionTest
         var slidingExpiration = new TimeSpan(1234);
         var cacheItem = new CacheItem();
         var result = cacheItem.SetSlidingExpiration(slidingExpiration);
-        using (new AssertionScope())
-        {
-            result.SlidingExpiration.Should().Be(slidingExpiration.Ticks);
-            result.Should().Be(cacheItem);
-        }
+        result.SlidingExpiration.ShouldBe(slidingExpiration.Ticks);
+        result.ShouldBe(cacheItem);
     }
 
     [Fact]
@@ -91,11 +79,8 @@ public class CacheItemExtensionTest
     {
         var cacheItem = new CacheItem { ExpireAt = DateTimeOffset.UtcNow.Ticks };
         var result = cacheItem.SetExpireAt(null);
-        using (new AssertionScope())
-        {
-            result.ExpireAt.Should().BeNull();
-            result.Should().Be(cacheItem);
-        }
+        result.ExpireAt.ShouldBeNull();
+        result.ShouldBe(cacheItem);
     }
 
     [Fact]
@@ -104,10 +89,7 @@ public class CacheItemExtensionTest
         var expireAt = DateTimeOffset.UtcNow;
         var cacheItem = new CacheItem();
         var result = cacheItem.SetExpireAt(expireAt);
-        using (new AssertionScope())
-        {
-            result.ExpireAt.Should().Be(expireAt.Ticks);
-            result.Should().Be(cacheItem);
-        }
+        result.ExpireAt.ShouldBe(expireAt.Ticks);
+        result.ShouldBe(cacheItem);
     }
 }

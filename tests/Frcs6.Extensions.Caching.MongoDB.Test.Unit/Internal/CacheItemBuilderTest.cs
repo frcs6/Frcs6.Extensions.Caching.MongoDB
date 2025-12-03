@@ -24,7 +24,7 @@ public class CacheItemBuilderTest : BaseTest
 
         var act = () => _sut.Build(key!, value!, options!);
 
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public class CacheItemBuilderTest : BaseTest
 
         var act = () => _sut.Build(DefaultKey, DefaultValue, options);
 
-        act.Should().Throw<ArgumentOutOfRangeException>();
+        act.ShouldThrow<ArgumentOutOfRangeException>();
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
 
-        result.Should().BeEquivalentTo(expected);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
 
-        result.Should().BeEquivalentTo(expected);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -80,7 +80,8 @@ public class CacheItemBuilderTest : BaseTest
         MongoCacheOptions.AllowNoExpiration = false;
         var options = new DistributedCacheEntryOptions();
         var act = () => _sut.Build(DefaultKey, DefaultValue, options);
-        act.Should().Throw<InvalidOperationException>().WithMessage("Cache without expiration is not allowed");
+        var ex = Should.Throw<InvalidOperationException>(() => act());
+        ex.Message.ShouldBe("Cache without expiration is not allowed");
     }
 
     [Fact]
@@ -100,7 +101,7 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
 
-        result.Should().BeEquivalentTo(expected);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -120,7 +121,7 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
 
-        result.Should().BeEquivalentTo(expected);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -143,7 +144,7 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
 
-        result.Should().BeEquivalentTo(expected);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -166,14 +167,14 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Build(DefaultKey, DefaultValue, options);
 
-        result.Should().BeEquivalentTo(expected);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
     public void GivenNullCacheItem_WhenRefresh_ThenArgumentNullException()
     {
         var act = () => _sut.Refresh(null!);
-        act.Should().Throw<ArgumentNullException>();
+        Should.Throw<ArgumentNullException>(() => act());
     }
 
     [Fact]
@@ -184,11 +185,8 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Refresh(cacheItem);
 
-        using (new AssertionScope())
-        {
-            cacheItem.Should().BeEquivalentTo(expected);
-            result.Should().BeFalse();
-        }
+        cacheItem.ShouldBeEquivalentTo(expected);
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -203,11 +201,8 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Refresh(cacheItem);
 
-        using (new AssertionScope())
-        {
-            cacheItem.Should().BeEquivalentTo(expected);
-            result.Should().BeTrue();
-        }
+        cacheItem.ShouldBeEquivalentTo(expected);
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -226,11 +221,8 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Refresh(cacheItem);
 
-        using (new AssertionScope())
-        {
-            cacheItem.Should().BeEquivalentTo(expected);
-            result.Should().BeTrue();
-        }
+        cacheItem.ShouldBeEquivalentTo(expected);
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -249,11 +241,8 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Refresh(cacheItem);
 
-        using (new AssertionScope())
-        {
-            cacheItem.Should().BeEquivalentTo(expected);
-            result.Should().BeTrue();
-        }
+        cacheItem.ShouldBeEquivalentTo(expected);
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -272,10 +261,7 @@ public class CacheItemBuilderTest : BaseTest
 
         var result = _sut.Refresh(cacheItem);
 
-        using (new AssertionScope())
-        {
-            cacheItem.Should().BeEquivalentTo(expected);
-            result.Should().BeTrue();
-        }
+        cacheItem.ShouldBeEquivalentTo(expected);
+        result.ShouldBeTrue();
     }
 }
