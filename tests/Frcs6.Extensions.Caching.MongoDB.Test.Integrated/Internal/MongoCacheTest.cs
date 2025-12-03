@@ -38,16 +38,16 @@ public sealed class MongoCacheTest : BaseTest, IClassFixture<MongoDatabaseTest>,
         cache.SetString(key2, value2,
             new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20) });
 
-        cache.GetString(key1).Should().Be(value1);
-        cache.GetString(key2).Should().Be(value2);
+        cache.GetString(key1).ShouldBe(value1);
+        cache.GetString(key2).ShouldBe(value2);
 
         ConfigureUtcNow(UtcNow.AddMinutes(1));
 
-        cache.GetString(key1).Should().Be(value1);
-        cache.GetString(key2).Should().Be(null);
+        cache.GetString(key1).ShouldBe(value1);
+        cache.GetString(key2).ShouldBe(null);
 
         cache.Remove(key1);
-        cache.GetString(key1).Should().Be(null);
+        cache.GetString(key1).ShouldBe(null);
     }
 
     [Fact]
@@ -69,16 +69,16 @@ public sealed class MongoCacheTest : BaseTest, IClassFixture<MongoDatabaseTest>,
         await cache.SetStringAsync(key2, value2,
             new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20) });
 
-        (await cache.GetStringAsync(key1)).Should().Be(value1);
-        (await cache.GetStringAsync(key2)).Should().Be(value2);
+        (await cache.GetStringAsync(key1)).ShouldBe(value1);
+        (await cache.GetStringAsync(key2)).ShouldBe(value2);
 
         ConfigureUtcNow(UtcNow.AddMinutes(1));
 
-        (await cache.GetStringAsync(key1)).Should().Be(value1);
-        (await cache.GetStringAsync(key2)).Should().Be(null);
+        (await cache.GetStringAsync(key1)).ShouldBe(value1);
+        (await cache.GetStringAsync(key2)).ShouldBe(null);
 
         await cache.RemoveAsync(key1);
-        (await cache.GetStringAsync(key1)).Should().Be(null);
+        (await cache.GetStringAsync(key1)).ShouldBe(null);
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public sealed class MongoCacheTest : BaseTest, IClassFixture<MongoDatabaseTest>,
         }
 
         ConfigureUtcNow(UtcNow.AddMinutes(1));
-        cache.GetString(key).Should().Be(null);
+        cache.GetString(key).ShouldBe(null);
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public sealed class MongoCacheTest : BaseTest, IClassFixture<MongoDatabaseTest>,
         }
 
         ConfigureUtcNow(UtcNow.AddMinutes(1));
-        (await cache.GetStringAsync(key)).Should().Be(null);
+        (await cache.GetStringAsync(key)).ShouldBe(null);
     }
 
     private MongoCache GetMongoCache(Action<MongoCacheOptions> setupAction)

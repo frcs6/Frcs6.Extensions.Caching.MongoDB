@@ -23,7 +23,7 @@ public class MongoCacheTest : BaseTest
     public void GivenNullKey_WhenGet_ThenArgumentNullException()
     {
         var act = () => _sut.Get(null!);
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class MongoCacheTest : BaseTest
     {
         _cacheItemRepository.Setup(r => r.Read(DefaultKey)).Returns(_cacheItem);
         var result = _sut.Get(DefaultKey);
-        result.Should().BeEquivalentTo(DefaultValue);
+        result.ShouldBeEquivalentTo(DefaultValue);
     }
 
     [Fact]
@@ -79,14 +79,14 @@ public class MongoCacheTest : BaseTest
     {
         _cacheItemRepository.Setup(r => r.Read(DefaultKey)).Returns(_cacheItemNullValue);
         var result = _sut.Get(DefaultKey);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
     public async Task GivenNullKey_WhenGetAsync_ThenArgumentNullException()
     {
         var act = () => _sut.GetAsync(null!);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public class MongoCacheTest : BaseTest
     {
         _cacheItemRepository.Setup(r => r.ReadAsync(DefaultKey, DefaultToken)).ReturnsAsync(_cacheItem);
         var result = await _sut.GetAsync(DefaultKey, DefaultToken);
-        result.Should().BeEquivalentTo(DefaultValue);
+        result.ShouldBeEquivalentTo(DefaultValue);
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public class MongoCacheTest : BaseTest
     {
         _cacheItemRepository.Setup(r => r.ReadAsync(DefaultKey, DefaultToken)).ReturnsAsync(_cacheItemNullValue);
         var result = await _sut.GetAsync(DefaultKey, DefaultToken);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Theory]
@@ -160,7 +160,7 @@ public class MongoCacheTest : BaseTest
 
         var act = () => _sut.Set(key!, value!, options!);
 
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -200,7 +200,7 @@ public class MongoCacheTest : BaseTest
 
         var act = () => _sut.SetAsync(key!, value!, options!);
 
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -229,7 +229,7 @@ public class MongoCacheTest : BaseTest
     public void GivenNullKey_WhenRefresh_ThenArgumentNullException()
     {
         var act = () => _sut.Refresh(null!);
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -267,7 +267,7 @@ public class MongoCacheTest : BaseTest
     public async Task GivenNullKey_WhenRefreshAsync_ThenArgumentNullException()
     {
         var act = () => _sut.RefreshAsync(null!);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -305,7 +305,7 @@ public class MongoCacheTest : BaseTest
     public void GivenNullKey_WhenRemove_ThenArgumentNullException()
     {
         var act = () => _sut.Remove(null!);
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -326,7 +326,7 @@ public class MongoCacheTest : BaseTest
     public async Task GivenNullKey_WhenRemoveAsync_ThenArgumentNullException()
     {
         var act = () => _sut.RemoveAsync(null!);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]

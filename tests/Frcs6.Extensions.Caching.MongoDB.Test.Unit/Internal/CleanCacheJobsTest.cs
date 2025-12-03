@@ -19,7 +19,7 @@ public class CleanCacheJobsTest : BaseTest
     {
         MongoCacheOptions.RemoveExpiredDelay = null;
         var act = () => new CleanCacheJobs(_cacheItemRepository.Object, Options.Create(MongoCacheOptions));
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]

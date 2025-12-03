@@ -6,10 +6,10 @@
 
   <ItemGroup>
     <PackageReference Include="AutoFixture" />
-    <PackageReference Include="AutoFixture.AutoMoq" />
-    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="AutoFixture.AutoMoq" />    
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Moq" />
+    <PackageReference Include="Shouldly" />
     <PackageReference Include="Testcontainers.MongoDb" />
   </ItemGroup>  
 
