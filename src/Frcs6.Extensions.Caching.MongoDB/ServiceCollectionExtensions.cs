@@ -86,10 +86,12 @@ public static class ServiceCollectionExtensions
 
     private static TimeProvider DefaultTimeProvider() => TimeProvider.System;
     
+    [ExcludeFromCodeCoverage]
     private static IMongoClient GetMongoClient(IServiceProvider serviceProvider) =>
              serviceProvider.GetService<IMongoClient>() ??
              throw new InvalidOperationException("No MongoClient found.");
 
+    [ExcludeFromCodeCoverage]
     private static IOptions<MongoCacheOptions> GetMongoCacheOptions(IServiceProvider serviceProvider) =>
              serviceProvider.GetService<IOptions<MongoCacheOptions>>() ??
              throw new InvalidOperationException("No MongoCache options found.");
