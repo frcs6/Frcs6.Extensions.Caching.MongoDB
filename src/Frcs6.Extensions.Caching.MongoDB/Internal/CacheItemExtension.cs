@@ -1,33 +1,32 @@
-﻿namespace Frcs6.Extensions.Caching.MongoDB.Internal;
+﻿// ReSharper disable ConvertToExtensionBlock
+
+namespace Frcs6.Extensions.Caching.MongoDB.Internal;
 
 internal static class CacheItemExtension
 {
-    extension(CacheItem cacheItem)
+    public static DateTimeOffset? GetAbsoluteExpiration(this CacheItem cacheItem)
+        => cacheItem.AbsoluteExpiration.HasValue
+            ? new DateTimeOffset(cacheItem.AbsoluteExpiration.Value, TimeSpan.Zero)
+            : null;
+
+    public static CacheItem SetAbsoluteExpiration(this CacheItem cacheItem, DateTimeOffset? value)
     {
-        public DateTimeOffset? GetAbsoluteExpiration()
-            => cacheItem.AbsoluteExpiration.HasValue
-                ? new DateTimeOffset(cacheItem.AbsoluteExpiration.Value, TimeSpan.Zero)
-                : null;
+        cacheItem.AbsoluteExpiration = value?.Ticks;
+        return cacheItem;
+    }
 
-        public CacheItem SetAbsoluteExpiration(DateTimeOffset? value)
-        {
-            cacheItem.AbsoluteExpiration = value?.Ticks;
-            return cacheItem;
-        }
+    public static TimeSpan? GetSlidingExpiration(this CacheItem cacheItem)
+        => cacheItem.SlidingExpiration.HasValue ? new TimeSpan(cacheItem.SlidingExpiration.Value) : null;
 
-        public TimeSpan? GetSlidingExpiration()
-            => cacheItem.SlidingExpiration.HasValue ? new TimeSpan(cacheItem.SlidingExpiration.Value) : null;
+    public static CacheItem SetSlidingExpiration(this CacheItem cacheItem, TimeSpan? value)
+    {
+        cacheItem.SlidingExpiration = value?.Ticks;
+        return cacheItem;
+    }
 
-        public CacheItem SetSlidingExpiration(TimeSpan? value)
-        {
-            cacheItem.SlidingExpiration = value?.Ticks;
-            return cacheItem;
-        }
-
-        public CacheItem SetExpireAt(DateTimeOffset? value)
-        {
-            cacheItem.ExpireAt = value?.Ticks;
-            return cacheItem;
-        }
+    public static CacheItem SetExpireAt(this CacheItem cacheItem, DateTimeOffset? value)
+    {
+        cacheItem.ExpireAt = value?.Ticks;
+        return cacheItem;
     }
 }
