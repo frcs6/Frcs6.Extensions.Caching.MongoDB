@@ -33,5 +33,8 @@ public sealed class MongoCacheOptions : IOptions<MongoCacheOptions>
     /// </summary>
     public bool UseCleanCacheJobs { get; set; }
 
+    /// <summary>
+    /// Gets the current <see cref="MongoCacheOptions"/> instance for the options wrapper.
+    /// </summary>
     MongoCacheOptions IOptions<MongoCacheOptions>.Value => this;
 }
