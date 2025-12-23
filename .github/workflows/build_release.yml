@@ -62,9 +62,9 @@ jobs:
       run: |
         dotnet pack ./src/Frcs6.Extensions.Caching.MongoDB/Frcs6.Extensions.Caching.MongoDB.csproj \
           -c Release \
+          --no-build \
           -o ./artifact \
-          /p:PackageVersion=${{ steps.version.outputs.nuGetVersionV2 }} \
-          --no-build
+          /p:PackageVersion=${{ steps.version.outputs.fullSemVer }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v6.0.0
