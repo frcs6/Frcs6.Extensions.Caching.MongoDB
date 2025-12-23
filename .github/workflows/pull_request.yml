@@ -14,10 +14,10 @@ jobs:
  
     steps:
     - name: Checkout
-      uses: actions/checkout@v4.1.7
+      uses: actions/checkout@v6.0.1
 
     - name: Setup DotNet
-      uses: actions/setup-dotnet@v4.0.1
+      uses: actions/setup-dotnet@v5.0.1
       with:
         dotnet-version: ${{ matrix.dotnet-version }}.x
         dotnet-quality: 'preview'
@@ -58,7 +58,7 @@ jobs:
           --no-restore
 
     - name: Publish coverage to Codecov
-      uses: codecov/codecov-action@v4.5.0
+      uses: codecov/codecov-action@v5.5.2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: frcs6/Frcs6.Extensions.Caching.MongoDB
