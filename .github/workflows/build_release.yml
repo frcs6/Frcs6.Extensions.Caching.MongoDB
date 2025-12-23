@@ -8,7 +8,7 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest   
     outputs: 
-      version: ${{ steps.version.outputs.nuGetVersionV2 }}
+      version: ${{ steps.version.outputs.fullSemVer }}
  
     steps:
     - name: Checkout
