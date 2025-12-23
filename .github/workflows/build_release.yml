@@ -8,7 +8,7 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest   
     outputs: 
-      version: ${{ steps.version.outputs.fullSemVer }}
+      version: ${{ steps.nuget.outputs.value }}
  
     steps:
     - name: Checkout
@@ -25,6 +25,13 @@ jobs:
       uses: gittools/actions/gitversion/execute@v4.2.0
       id: version
 
+    - name: Compose NuGet stable version
+      id: nuget
+      run: |
+        VERSION="${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ steps.version.outputs.patch }}"
+        echo "value=$VERSION" >> $GITHUB_OUTPUT
+        echo "NuGet version: $VERSION"
+        
     - name: Setup DotNet
       uses: actions/setup-dotnet@v5.0.1
       with:
@@ -64,7 +71,7 @@ jobs:
           -c Release \
           --no-build \
           -o ./artifact \
-          /p:PackageVersion=${{ steps.version.outputs.fullSemVer }}
+          /p:PackageVersion=${{ steps.nuget.outputs.value }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v6.0.0
