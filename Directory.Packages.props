@@ -26,10 +26,4 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
   </ItemGroup>
-  <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.101">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </GlobalPackageReference>
-  </ItemGroup>
 </Project>
