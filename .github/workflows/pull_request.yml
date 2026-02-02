@@ -27,6 +27,11 @@ jobs:
         dotnet restore Frcs6.Extensions.Caching.MongoDB.sln \
           -p:TargetFramework=net${{ matrix.dotnet-version }}
 
+    - name: Clean project
+      run: |
+        dotnet clean Frcs6.Extensions.Caching.MongoDB.sln \
+          -f net${{ matrix.dotnet-version }}
+
     - name: Build solution
       run: |
         dotnet build Frcs6.Extensions.Caching.MongoDB.sln \
