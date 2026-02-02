@@ -11,7 +11,7 @@ public sealed class MongoDatabaseTest : IDisposable
 
     public MongoDatabaseTest()
     {
-        _container = new MongoDbBuilder().Build();
+        _container = new MongoDbBuilder("mongo:6.0").Build();
         _container.StartAsync().Wait();
     }
 
