@@ -4,6 +4,9 @@ on:
   push:
     branches: [ 'main', 'releases/*' ]
 
+permissions:
+  contents: read
+
 jobs:
   build_and_test:
     runs-on: ubuntu-latest   
@@ -92,6 +95,8 @@ jobs:
   publish_release:
     needs: build_and_test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
     - name: Download artifact
@@ -115,6 +120,8 @@ jobs:
   publish_nuget:
     needs: build_and_test
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     strategy:
       matrix:
         registry: [github, nuget_org]
