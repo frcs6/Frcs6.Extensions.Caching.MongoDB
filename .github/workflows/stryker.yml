@@ -1,5 +1,8 @@
 name: 'Stryker'
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ 'main' ]
