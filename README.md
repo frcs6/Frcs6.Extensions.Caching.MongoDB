@@ -9,11 +9,6 @@
 
 This implementation is based on the official version for Sql Server and Redis available [here](https://github.com/dotnet/aspnetcore/tree/main/src/Caching).
 
-## ⚠️ Compatibility Warning
-
-**Version 6.x** supports **.NET 10 only**.  
-For **.NET 8** or **.NET 9**, use **version 5.x**.
-
 ## Installation / Usage
 
 - Add package [Frcs6.Extensions.Caching.MongoDB](https://www.nuget.org/packages/Frcs6.Extensions.Caching.MongoDB/).
