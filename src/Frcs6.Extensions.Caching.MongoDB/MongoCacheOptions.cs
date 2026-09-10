@@ -5,7 +5,6 @@ namespace Frcs6.Extensions.Caching.MongoDB;
 /// <summary>
 /// Configuration options.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public sealed class MongoCacheOptions : IOptions<MongoCacheOptions>
 {
     /// <summary>
