@@ -11,7 +11,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="$(MSBuildProjectName.Contains('Test'))">
     <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
+    <IsTestProject>true</IsTestProject>    
   </PropertyGroup>
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Integrated')) OR $(MSBuildProjectName.EndsWith('Unit'))">
     <PackageReference Include="coverlet.msbuild">
