@@ -52,8 +52,7 @@ jobs:
     - name: Restore examples
       if: ${{ contains(matrix.dotnet-version, '10.0') }}
       run: | 
-        dotnet restore Frcs6.Extensions.Caching.MongoDB.Examples.sln \
-          -p:TargetFramework=net${{ matrix.dotnet-version }}
+        dotnet restore Frcs6.Extensions.Caching.MongoDB.Examples.sln
 
     - name: Build examples
       if: ${{ contains(matrix.dotnet-version, '10.0') }}
