@@ -68,6 +68,7 @@ jobs:
 
     - name: Build examples
       run: |
+        dotnet clean Frcs6.Extensions.Caching.MongoDB.Examples.sln
         dotnet build Frcs6.Extensions.Caching.MongoDB.Examples.sln \
           -c Release \
           -f net10.0
